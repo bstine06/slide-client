@@ -1,0 +1,13 @@
+.buttons > button {
+    width: 100%;
+    padding: 10px;
+    margin: 5px;
+    background-color: #770000;
+    color: white;
+    font-weight: bold;
+    border: none;
+}
+
+.buttons > button:hover {
+    background-color: #EE0000;
+}

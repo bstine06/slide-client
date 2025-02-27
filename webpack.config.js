@@ -4,6 +4,12 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   mode: 'development', // Change to 'production' for builds
   entry: './src/index.js',
+  devServer: {
+    port: 3000, // Change this from 8080 to 3000
+    open: true,
+    historyApiFallback: true,
+    hot: true,
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
@@ -12,11 +18,14 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/,
+        test: /\.jsx?$/, // Match .js and .jsx files
+        use: 'babel-loader',
         exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-        },
+      },
+      {
+        test: /\.(ts|tsx)$/, // If you also have TypeScript
+        use: 'ts-loader',
+        exclude: /node_modules/,
       },
       {
         test: /\.css$/,
@@ -25,7 +34,7 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: ['.js', '.jsx'], // Enables omitting file extensions for imports
+    extensions: ['.js', '.jsx', '.ts', '.tsx'], // Enables omitting file extensions for imports
   },
   plugins: [
     new HtmlWebpackPlugin({

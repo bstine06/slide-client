@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import '../styles/login.css';
 import { registerUser } from "../api/AuthenticateAPI";
+import { useAuth } from "../context/AuthContext";
 
 const Register = () => {
 
@@ -8,12 +9,14 @@ const Register = () => {
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [error, setError] = useState<string>("");
+    const { setToken } = useAuth();
 
     const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         
         try {
-            const result = await registerUser({ email, username, password });
+            const jwtToken = await registerUser({ email, username, password });
+            setToken(jwtToken);
         } catch (error) {
             setError('Failed to register.');
         }

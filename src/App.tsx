@@ -5,16 +5,23 @@ import Register from "./authenticate/Register";
 import Menu from "./components/menu/Menu";
 import Game from "./components/game/Game";
 
-type AppState = "REGISTER" | "LOGIN" | "MENU" | "GAME";
+import { useAuth } from "./context/AuthContext";
+import { useAppState } from "./context/StateContext";
 
 const App: React.FC = () => {
-    const [appState, setAppState] = useState<AppState>("REGISTER");
+
+    const { isAuthenticated } = useAuth();
+    const { appState } = useAppState();
+
+    if (!isAuthenticated) {
+        return appState === "REGISTER" ? <Register /> : <Login />;
+    }
 
     return (
         <>
             {appState === "REGISTER" && <Register />}
             {appState === "LOGIN" && <Login />}
-            {appState === "MENU" && <Menu />}
+            {appState === "LOBBY" && <Menu />}
             {appState === "GAME" && <Game />}
         </>
     );

@@ -1,8 +1,8 @@
 const BASE_URL = 'http://localhost:8443/api/v1/auth';
 
-import { AuthenticatePayload, RegisterPayload } from "../types/AuthenticationTypes";
+import { AuthenticatePayload, RegisterPayload, AuthResponse } from "../types/AuthenticationTypes";
 
-export async function registerUser(payload: RegisterPayload): Promise<string> {
+export async function registerUser(payload: RegisterPayload): Promise<AuthResponse> {
   try {
     const response = await fetch(`${BASE_URL}/register`, {
       method: 'POST',
@@ -15,7 +15,7 @@ export async function registerUser(payload: RegisterPayload): Promise<string> {
     if (!response.ok) {
       throw new Error('Registration failed');
     }
-    const token = await response.text();
+    const token = await response.json();
     return token;
   } catch (error) {
     console.error('Error during registration:', error);
@@ -23,8 +23,7 @@ export async function registerUser(payload: RegisterPayload): Promise<string> {
   }
 }
 
-export async function authenticateUser(payload: AuthenticatePayload): Promise<string> {
-  console.log(JSON.stringify(payload));
+export async function authenticateUser(payload: AuthenticatePayload): Promise<AuthResponse> {
   try {
     const response = await fetch(`${BASE_URL}/authenticate`, {
       method: 'POST',
@@ -38,7 +37,7 @@ export async function authenticateUser(payload: AuthenticatePayload): Promise<st
       throw new Error('Authentication failed');
     }
 
-    const token = await response.text();
+    const token = await response.json();
     return token;
   } catch (error) {
     console.error('Error during authentication:', error);

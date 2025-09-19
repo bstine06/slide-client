@@ -8,3 +8,18 @@ export interface AuthenticatePayload {
     username: string;
     password: string;
 }
+
+export interface AuthResponse {
+  token: string;
+  message: string | null;
+}
+
+export interface CredentialsCheckResponse {
+  isAvailable: boolean;
+  message: string | null;
+}
+
+export interface UserProfileResponse {
+    username: string;
+    email: string;
+}

@@ -1,16 +1,44 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "../../styles/menu.css";
-
-type MenuState = "INIT" | "HOST" | "JOIN";
+import { useAppState } from "../../context/StateContext";
+import { useAuth } from "../../context/AuthContext";
+import { getUserProfile } from "../../api/UserAPI";
 
 const Menu = () => {
 
+    const { appState, setAppState } = useAppState();
+    const { token, username, logout } = useAuth();
+
+    useEffect(() => {
+        console.log("in MENU");
+        (async () => {
+            try {
+                if (token && username) {
+                    const profile = await getUserProfile(username, token);
+                    console.log("User profile:", profile);
+                }
+            } catch (error) {
+                console.error("Failed to fetch user profile:", error);
+            }
+        })();
+    }, [token])
+
     const createLobby = () => {
-        
+        setAppState("CREATE");
     }
 
     const joinGame = () => {
+        setAppState("JOIN");
+    }
 
+    const handleLogout = () => {
+        logout();
+        setAppState("LOGIN");
+    }
+
+    // TODO remove this once canvas is actually implemented
+    const handleGameCanvasTest = () => {
+        setAppState("GAMEPLAY_TEST");
     }
 
     return (
@@ -21,6 +49,10 @@ const Menu = () => {
             <div className="buttons">
                 <button onClick={createLobby}>CREATE LOBBY</button>
                 <button onClick={joinGame}>JOIN GAME</button>
+                <button onClick={handleLogout}>LOG OUT</button>
+
+                {/* TODO remove this once canvas is actually implemented */}
+                <button onClick={handleGameCanvasTest}>Test Gameplay</button>
             </div>
         </>
     )

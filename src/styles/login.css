@@ -15,18 +15,58 @@ form {
     display: flex;
     flex-direction: column; /* Stack items vertically */
     align-items: flex-start;
-    gap: 10px;
-    max-width: 200px;
+    gap: 5px;
+    width: 300px;
 }
 
 form .username,
 form .password {
-    font-size: 24px;
+    font-size: 20px;
     flex-grow: 1; /* All items grow equally */
     width: 100%;  /* Make each item take up the full width of the form */
 }
 
 form button {
+    margin-bottom: 12px;
+    font-size: 16px;
     flex-grow: 1; /* All items grow equally */
     width: 100%;  /* Make each item take up the full width of the form */
+    cursor:pointer;
+    border: none;
+    margin-top: 10px;
+    height: 2em;
+}
+
+form button:hover {
+    background-color: #FFEEEE;
+    box-shadow: 0px 0px 5px pink;
+    border: none;
+}
+
+form button:disabled:hover {
+    cursor:no-drop;
+    background-color: rgba(239, 239, 239, 0.3);
+    box-shadow: none;
+    border: none;
+}
+
+form label {
+    font-size: 18px;
+}
+
+.link {
+    text-decoration: underline;
+    color: #CCC;
+    cursor:pointer;
+}
+
+.link:hover {
+    color: white;
+}
+
+.error-message {
+    margin-top: 0;
+    color: #F36;
+    min-height: 20px;
+    text-align: left;
 }

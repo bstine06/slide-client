@@ -1,4 +1,4 @@
-import { ResponseDto, GameDto, GameOptions } from "../types/GameTypes";
+import { ResponseDto, GameDto, CreateGamePayload } from "../types/GameTypes";
 
 const BASE_URL = "http://localhost:8443/api/v1/game";
 
@@ -82,8 +82,8 @@ export async function deleteGame(token: string): Promise<boolean> {
     }
 }
 
-export async function createGame(gameOptions: GameOptions, token: string): Promise<ResponseDto<GameDto>> {
-    console.log(gameOptions);
+export async function createGame(createGamePayload: CreateGamePayload, token: string): Promise<ResponseDto<GameDto>> {
+    console.log(JSON.stringify(createGamePayload));
     try {
       const response = await fetch(`${BASE_URL}`, {
         method: 'POST',
@@ -91,7 +91,7 @@ export async function createGame(gameOptions: GameOptions, token: string): Promi
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(gameOptions)
+        body: JSON.stringify(createGamePayload)
       });
   
       if (!response.ok) {

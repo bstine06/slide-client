@@ -1,7 +1,6 @@
 import {
     Direction,
     DirectionNonNull,
-    GameOptions,
     Maze
 } from "../../types/GameTypes";
 import { DensityType } from "../../types/MazeGenerationTypes";
@@ -218,8 +217,8 @@ class MazeGenerator {
     }
 
     static generateMazeArray(count: number, dimension: number, densityType: DensityType, enforceShortestPathGreaterThan : number = 0) {
-        if (count <= 4 && enforceShortestPathGreaterThan) throw new Error("Cannot enforce shortest path on tiny mazes");
-        if (enforceShortestPathGreaterThan > count / 2) throw new Error("Cannot enforce shortest path greater than 1/2 of dimension");
+        if (dimension <= 4 && enforceShortestPathGreaterThan) throw new Error("Cannot enforce shortest path on tiny mazes");
+        if (enforceShortestPathGreaterThan > dimension / 2) throw new Error("Cannot enforce shortest path greater than 1/2 of dimension");
         let mazeArray : Maze[] = [];
         let startX = Math.floor(Math.random() * dimension);
         let startY = Math.floor(Math.random() * dimension);

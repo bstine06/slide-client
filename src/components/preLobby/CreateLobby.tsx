@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useAppState } from "../../context/StateContext";
 import { createGame, joinGame } from "../../api/GameAPI";
-import { GameOptions, Maze } from "../../types/GameTypes";
+import { CreateGamePayload, Maze } from "../../types/GameTypes";
 import MazeGenerator from "../game/MazeGenerator";
 
 const CreateLobby: React.FC = () => {
@@ -22,19 +22,16 @@ const CreateLobby: React.FC = () => {
 
                 const DIMENSION = 10;
 
-                let startY = Math.floor(Math.random() * DIMENSION);
-                let startX = Math.floor(Math.random() * DIMENSION);
-
                 const generatedMazes = MazeGenerator.generateMazeArray(
                     roundsCount, 
                     DIMENSION, 
                     "BIAS_DENSE_AND_SPARSE",
                     3);
 
-                const gameOptions: GameOptions = {
+                const createGamePayload : CreateGamePayload = {
                     mazes: generatedMazes
                 };
-                const createdGame = (await createGame(gameOptions, token)).content;
+                const createdGame = (await createGame(createGamePayload, token)).content;
                 console.log("Game created: ", createdGame.gameId);
 
                 setCurrentGameId(createdGame.gameId);

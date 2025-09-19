@@ -6,7 +6,7 @@ export interface Maze {
   board: number[][]; // 2D array of ints
 }
 
-export interface GameOptions {
+export interface CreateGamePayload {
   mazes: Maze[];
 }
 

@@ -6,11 +6,10 @@ import React, {
     useEffect,
     useRef,
 } from "react";
-import { GameDto, Player } from "../types/GameTypes";
+import { GameDto } from "../types/GameTypes";
 import { useAuth } from "./AuthContext";
 import { useAppState } from "./StateContext";
 import {
-    GameWebSocketMessageType,
     PlayerNameOnlyPayload,
     PlayerReadyPayload,
     PlayerUpdatePayload,
@@ -92,26 +91,28 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
                         };
 
                     case "PLAYER_UPDATE":
+                        const prevPlayers = prevGame.players;
+                        const newPlayers = { ...prevPlayers };
+
+                        newPlayers[payload.username] = {
+                            ...prevPlayers[payload.username], // old state
+                            ...payload, // merge new
+                        };
+
                         return {
                             ...prevGame,
-                            players: {
-                                ...prevGame.players,
-                                [payload.username]: {
-                                    ...prevGame.players[payload.username],
-                                    ...payload,
-                                },
-                            },
+                            players: newPlayers,
                         };
 
                     case "PLAYER_LEAVE":
                         const updatedPlayers = { ...prevGame.players };
                         delete updatedPlayers[payload.username];
-                        return { 
-                            ...prevGame, 
-                            players: updatedPlayers };
+                        return {
+                            ...prevGame,
+                            players: updatedPlayers,
+                        };
 
                     case "GAME_START":
-                        console.log(payload);
                         return { ...payload };
 
                     case "GAME_STATE":

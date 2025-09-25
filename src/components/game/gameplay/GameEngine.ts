@@ -13,7 +13,6 @@ export class GameEngine {
     private listeners: EngineEventCallback[] = [];
     private lastSentLocal: PlayerUpdatePayload | null = null;
 
-
     constructor(initialState: GameDto, localUsername: string) {
         this.state = initialState;
         this.localUsername = localUsername;
@@ -24,33 +23,37 @@ export class GameEngine {
     }
 
     offPlayerUpdate(callback: EngineEventCallback) {
-        this.listeners = this.listeners.filter(l => l !== callback);
+        this.listeners = this.listeners.filter((l) => l !== callback);
     }
 
     private emitPlayerUpdate(update: PlayerUpdatePayload) {
-        this.listeners.forEach(l => l(update));
+        this.listeners.forEach((l) => l(update));
     }
 
-    private isEqualPlayerState(a: PlayerUpdatePayload, b: PlayerUpdatePayload): boolean {
-    return (
-        a.level === b.level &&
-        a.x === b.x &&
-        a.y === b.y &&
-        a.vx === b.vx &&
-        a.vy === b.vy &&
-        a.nextMove === b.nextMove &&
-        a.stopX === b.stopX &&
-        a.stopY === b.stopY
-    );
-}
+    private isEqualPlayerState(
+        a: PlayerUpdatePayload,
+        b: PlayerUpdatePayload
+    ): boolean {
+        return (
+            a.level === b.level &&
+            a.x === b.x &&
+            a.y === b.y &&
+            a.vx === b.vx &&
+            a.vy === b.vy &&
+            a.nextMove === b.nextMove &&
+            a.stopX === b.stopX &&
+            a.stopY === b.stopY
+        );
+    }
 
     // Called once per frame
     update(delta: number) {
         const updatedPlayers: Record<string, Player> = {};
 
         for (const [username, p] of Object.entries(this.state.players)) {
+            
             const maze = this.state.mazes[p.level];
-            this.VELOCITY = maze.board.length / 5 + (5/maze.board.length);
+            this.VELOCITY = maze.board.length / 5 + 5 / maze.board.length;
             const velocityCap = this.VELOCITY * 5;
 
             //check for finish
@@ -60,26 +63,6 @@ export class GameEngine {
             ) {
                 this.advanceLevel(p.username);
             }
-
-            if (username === this.localUsername) {
-    const current: PlayerUpdatePayload = {
-        username: p.username,
-        level: p.level,
-        x: p.x,
-        y: p.y,
-        vx: p.vx,
-        vy: p.vy,
-        nextMove: p.nextMove,
-        stopX: p.stopX!,
-        stopY: p.stopY!,
-    };
-
-    if (!this.lastSentLocal || !this.isEqualPlayerState(this.lastSentLocal, current)) {
-        this.lastSentLocal = { ...current }; // cache for next frame
-        this.emitPlayerUpdate(current);
-    }
-}
-            
 
             if (p.vx === 0 && p.vy === 0) {
                 if (p.nextMove) {
@@ -136,7 +119,6 @@ export class GameEngine {
 
             // Default (no collision, no movement)
             updatedPlayers[username] = { ...p, x: newX, y: newY };
-
         }
 
         this.state = {
@@ -159,9 +141,10 @@ export class GameEngine {
         } else {
             p.nextMove = "LEFT";
         }
+        this.sendUpdate(p);
     }
     moveRight(username: string, velocity: number = this.VELOCITY): void {
-        console.log("ENGINE MOVE RIGHT")
+        console.log("ENGINE MOVE RIGHT");
         const p = this.state.players[username];
         if (p.vy === 0) {
             p.vx = velocity;
@@ -169,6 +152,7 @@ export class GameEngine {
         } else {
             p.nextMove = "RIGHT";
         }
+        this.sendUpdate(p);
     }
     moveUp(username: string, velocity: number = this.VELOCITY): void {
         const p = this.state.players[username];
@@ -178,6 +162,7 @@ export class GameEngine {
         } else {
             p.nextMove = "UP";
         }
+        this.sendUpdate(p);
     }
     moveDown(username: string, velocity: number = this.VELOCITY): void {
         const p = this.state.players[username];
@@ -187,6 +172,7 @@ export class GameEngine {
         } else {
             p.nextMove = "DOWN";
         }
+        this.sendUpdate(p);
     }
     goToStart(username: string) {
         const p = this.state.players[username];
@@ -195,7 +181,7 @@ export class GameEngine {
         p.y = maze.startY;
         p.vx = 0;
         p.vy = 0;
-        console.log(p);
+        this.sendUpdate(p);
     }
     advanceLevel(username: string) {
         const p = this.state.players[username];
@@ -206,6 +192,39 @@ export class GameEngine {
         p.vy = 0;
         p.stopX = null;
         p.stopY = null;
+        this.sendUpdate(p);
+    }
+    
+    updateOtherPlayers(serverPlayers: Record<string, Player>, localUsername: string) {
+        for (const [username, serverPlayer] of Object.entries(serverPlayers)) {
+            if (username !== localUsername) {
+                this.state.players[username] = { ...serverPlayer };
+            }
+        }
+    }
+
+    sendUpdate(p: Player) {
+        if (p.username === this.localUsername) {
+                const current: PlayerUpdatePayload = {
+                    username: p.username,
+                    level: p.level,
+                    x: p.x,
+                    y: p.y,
+                    vx: p.vx,
+                    vy: p.vy,
+                    nextMove: p.nextMove,
+                    stopX: p.stopX!,
+                    stopY: p.stopY!,
+                };
+
+                if (
+                    !this.lastSentLocal ||
+                    !this.isEqualPlayerState(this.lastSentLocal, current)
+                ) {
+                    this.lastSentLocal = { ...current }; // cache for next send
+                    this.emitPlayerUpdate(current);
+                }
+            }
     }
 
     private recalcStopPosition(p: Player) {
@@ -216,7 +235,7 @@ export class GameEngine {
             // moving right
             let stopX = board[0].length - 1;
             for (let x = Math.floor(p.x) + 1; x < board[0].length; x++) {
-                const checkSpace = board[Math.floor(p.y)][x]
+                const checkSpace = board[Math.floor(p.y)][x];
                 if (checkSpace === 1) {
                     stopX = x - 1;
                     break;
@@ -230,7 +249,7 @@ export class GameEngine {
             // moving left
             let stopX = 0;
             for (let x = Math.floor(p.x) - 1; x >= 0; x--) {
-                const checkSpace = board[Math.floor(p.y)][x]
+                const checkSpace = board[Math.floor(p.y)][x];
                 if (checkSpace === 1) {
                     stopX = x + 1;
                     break;
@@ -247,7 +266,7 @@ export class GameEngine {
             // moving down
             let stopY = board.length - 1;
             for (let y = Math.floor(p.y) + 1; y < board.length; y++) {
-                const checkSpace = board[y][Math.floor(p.x)]
+                const checkSpace = board[y][Math.floor(p.x)];
                 if (checkSpace === 1) {
                     stopY = y - 1;
                     break;
@@ -261,7 +280,7 @@ export class GameEngine {
             // moving up
             let stopY = 0;
             for (let y = Math.floor(p.y) - 1; y >= 0; y--) {
-                const checkSpace = board[y][Math.floor(p.x)]
+                const checkSpace = board[y][Math.floor(p.x)];
                 if (checkSpace === 1) {
                     stopY = y + 1;
                     break;

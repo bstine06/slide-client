@@ -1,5 +1,5 @@
 import { PlayerDrawable } from "./PlayerDrawable";
-import { GameDto, Player } from "../../../../types/GameTypes";
+import { GameDto  } from "../../../../types/GameTypes";
 import { buildWallLayer } from "./WallLayer";
 
 let wallLayerCache: { canvas: HTMLCanvasElement; mazeIndex: number } | null = null;
@@ -35,7 +35,7 @@ export function renderGame(context: CanvasRenderingContext2D, game: GameDto, pla
                 p.y * cellSize,
                 cellSize,
                 cellSize,
-                "red"
+                p.color
             ).draw(context);
         }
     });

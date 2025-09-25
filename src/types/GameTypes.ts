@@ -37,4 +37,5 @@ export interface Player {
     nextMove: Direction;
     stopX: number | null;
     stopY: number | null;
+    color: string;
 }

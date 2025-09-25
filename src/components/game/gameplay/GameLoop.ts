@@ -7,7 +7,7 @@ import { GameEngine } from "./GameEngine";
  */
 export function startGameLoop(
     engine: GameEngine,
-    setRenderState: React.Dispatch<React.SetStateAction<GameDto | null>>
+    updateRenderState: (serverSnapshot: GameDto) => void
 ) {
     let lastTime = performance.now();
 
@@ -17,12 +17,13 @@ export function startGameLoop(
         lastTime = now;
 
         engine.update(delta);
-        setRenderState({ ...engine.getState() });
+        updateRenderState({ ...engine.getState() });
 
         requestAnimationFrame(loop);
     };
 
     requestAnimationFrame(loop);
 }
+
 
 

@@ -1,169 +1,309 @@
+import { HttpError } from "../types/ErrorTypes";
 import { ResponseDto, GameDto, CreateGamePayload } from "../types/GameTypes";
 
 const BASE_URL = "http://localhost:8443/api/v1/game";
 
-export async function joinGame(gameId: string, token: string): Promise<ResponseDto<GameDto>> {
-  try {
-    const response = await fetch(`${BASE_URL}/${gameId}`, {
-      method: "PATCH", // matches your @PatchMapping
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      }
-    });
+export async function joinGame(
+    gameId: string,
+    token: string
+): Promise<ResponseDto<GameDto>> {
+    try {
+        const response = await fetch(`${BASE_URL}/${gameId}`, {
+            method: "PATCH", // matches your @PatchMapping
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
 
-    if (!response.ok) {
-      // attempt to parse backend error message if sent as JSON
-      let errorMsg = `Join game failed: ${response.status}`;
-      try {
-        const errorBody = await response.json();
-        if (errorBody?.message) errorMsg = `Join game failed: ${errorBody.message}`;
-      } catch {}
-      throw new Error(errorMsg);
+        if (!response.ok) {
+            const errorBody = await response.json().catch(() => ({}));
+
+            if (response.status === 400) {
+                throw new HttpError(
+                    400,
+                    errorBody.message || "Invalid data",
+                    "Check your input and try again."
+                );
+            } else if (response.status === 401) {
+                throw new HttpError(
+                    401,
+                    "Unauthorized: Invalid token",
+                    "Please log in again."
+                );
+            } else if (response.status === 409) {
+                throw new HttpError(
+                    409,
+                    errorBody.message || "Conflict occurred",
+                    "Try refreshing."
+                );
+            } else {
+                throw new HttpError(
+                    response.status,
+                    "Unexpected error",
+                    "Please try again later."
+                );
+            }
+        }
+        return response.json();
+    } catch (error) {
+        // If we already have an HttpError, just rethrow
+        if (error instanceof HttpError) throw error;
+
+        // Otherwise wrap it
+        throw new HttpError(500, (error as Error).message || "Unknown error");
     }
-
-    // correctly typed as ResponseDto<GameDto>
-    const data: ResponseDto<GameDto> = await response.json();
-    return data;
-
-  } catch (error) {
-    console.error("Error during trying to join game:", error);
-    throw error;
-  }
 }
 
 export async function leaveGame(token: string): Promise<ResponseDto<GameDto>> {
-  try {
-    const response = await fetch(`${BASE_URL}`, {
-      method: "PATCH", // matches your @PatchMapping
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      }
-    });
+    try {
+        const response = await fetch(`${BASE_URL}`, {
+            method: "PATCH", // matches your @PatchMapping
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
 
-    if (!response.ok) {
-      // attempt to parse backend error message if sent as JSON
-      let errorMsg = `Leave game failed: ${response.status}`;
-      try {
-        const errorBody = await response.json();
-        if (errorBody?.message) errorMsg = `Leave game failed: ${errorBody.message}`;
-      } catch {}
-      throw new Error(errorMsg);
+        if (!response.ok) {
+            const errorBody = await response.json().catch(() => ({}));
+
+            if (response.status === 400) {
+                throw new HttpError(
+                    400,
+                    errorBody.message || "Invalid data",
+                    "Check your input and try again."
+                );
+            } else if (response.status === 401) {
+                throw new HttpError(
+                    401,
+                    "Unauthorized: Invalid token",
+                    "Please log in again."
+                );
+            } else if (response.status === 409) {
+                throw new HttpError(
+                    409,
+                    errorBody.message || "Conflict occurred",
+                    "Try refreshing."
+                );
+            } else {
+                throw new HttpError(
+                    response.status,
+                    "Unexpected error",
+                    "Please try again later."
+                );
+            }
+        }
+        return response.json();
+    } catch (error) {
+        // If we already have an HttpError, just rethrow
+        if (error instanceof HttpError) throw error;
+
+        // Otherwise wrap it
+        throw new HttpError(500, (error as Error).message || "Unknown error");
     }
-
-    // correctly typed as ResponseDto<GameDto>
-    const data: ResponseDto<GameDto> = await response.json();
-    return data;
-
-  } catch (error) {
-    console.error("Error during trying to join game:", error);
-    throw error;
-  }
 }
 
 export async function deleteGame(token: string): Promise<boolean> {
     try {
-      const response = await fetch(`${BASE_URL}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+        const response = await fetch(`${BASE_URL}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.json().catch(() => ({}));
+
+            if (response.status === 400) {
+                throw new HttpError(
+                    400,
+                    errorBody.message || "Invalid data",
+                    "Check your input and try again."
+                );
+            } else if (response.status === 401) {
+                throw new HttpError(
+                    401,
+                    "Unauthorized: Invalid token",
+                    "Please log in again."
+                );
+            } else if (response.status === 409) {
+                throw new HttpError(
+                    409,
+                    errorBody.message || "Conflict occurred",
+                    "Try refreshing."
+                );
+            } else {
+                throw new HttpError(
+                    response.status,
+                    "Unexpected error",
+                    "Please try again later."
+                );
+            }
         }
-      });
-  
-      if (!response.ok) {
-        throw new Error('Delete game failed');
-      }
-      return response.json();
+        return response.json();
     } catch (error) {
-      console.error('Error during trying to delete game:', error);
-      throw error;
+        // If we already have an HttpError, just rethrow
+        if (error instanceof HttpError) throw error;
+
+        // Otherwise wrap it
+        throw new HttpError(500, (error as Error).message || "Unknown error");
     }
 }
 
-export async function createGame(createGamePayload: CreateGamePayload, token: string): Promise<ResponseDto<GameDto>> {
+export async function createGame(
+    createGamePayload: CreateGamePayload,
+    token: string
+): Promise<ResponseDto<GameDto>> {
     console.log(JSON.stringify(createGamePayload));
     try {
-      const response = await fetch(`${BASE_URL}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(createGamePayload)
-      });
-  
-      if (!response.ok) {
-            // handle specific status codes
+        const response = await fetch(`${BASE_URL}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(createGamePayload),
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.json().catch(() => ({}));
+
             if (response.status === 400) {
-                const errorBody = await response.json(); // optional: get error details from backend
-                throw new Error(`Bad Request: ${errorBody.message || 'Invalid data'}`);
+                throw new HttpError(
+                    400,
+                    errorBody.message || "Invalid data",
+                    "Check your input and try again."
+                );
             } else if (response.status === 401) {
-                throw new Error('Unauthorized: Invalid token');
+                throw new HttpError(
+                    401,
+                    "Unauthorized: Invalid token",
+                    "Please log in again."
+                );
+            } else if (response.status === 409) {
+                throw new HttpError(
+                    409,
+                    errorBody.message || "Conflict occurred",
+                    "Try refreshing."
+                );
             } else {
-                throw new Error(`Request failed with status ${response.status}`);
+                throw new HttpError(
+                    response.status,
+                    "Unexpected error",
+                    "Please try again later."
+                );
             }
         }
-
         return response.json();
     } catch (error) {
-        throw error;
+        // If we already have an HttpError, just rethrow
+        if (error instanceof HttpError) throw error;
+
+        // Otherwise wrap it
+        throw new HttpError(500, (error as Error).message || "Unknown error");
     }
 }
 
 export async function getGame(token: string): Promise<ResponseDto<GameDto>> {
     try {
-      const response = await fetch(`${BASE_URL}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-  
-      if (!response.ok) {
-            // handle specific status codes
+        const response = await fetch(`${BASE_URL}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.json().catch(() => ({}));
+
             if (response.status === 400) {
-                const errorBody = await response.json(); // optional: get error details from backend
-                throw new Error(`Bad Request: ${errorBody.message || 'Invalid data'}`);
+                throw new HttpError(
+                    400,
+                    errorBody.message || "Invalid data",
+                    "Check your input and try again."
+                );
             } else if (response.status === 401) {
-                throw new Error('Unauthorized: Invalid token');
+                throw new HttpError(
+                    401,
+                    "Unauthorized: Invalid token",
+                    "Please log in again."
+                );
+            } else if (response.status === 409) {
+                throw new HttpError(
+                    409,
+                    errorBody.message || "Conflict occurred",
+                    "Try refreshing."
+                );
             } else {
-                throw new Error(`Request failed with status ${response.status}`);
+                throw new HttpError(
+                    response.status,
+                    "Unexpected error",
+                    "Please try again later."
+                );
             }
         }
-
         return response.json();
     } catch (error) {
-        throw error;
+        // If we already have an HttpError, just rethrow
+        if (error instanceof HttpError) throw error;
+
+        // Otherwise wrap it
+        throw new HttpError(500, (error as Error).message || "Unknown error");
     }
 }
 
-export async function getGameById(gameId: string, token: string): Promise<ResponseDto<GameDto>> {
+export async function getGameById(
+    gameId: string,
+    token: string
+): Promise<ResponseDto<GameDto>> {
     try {
-      const response = await fetch(`${BASE_URL}/${gameId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-  
-      if (!response.ok) {
-            // handle specific status codes
+        const response = await fetch(`${BASE_URL}/${gameId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.json().catch(() => ({}));
+
             if (response.status === 400) {
-                const errorBody = await response.json(); // optional: get error details from backend
-                throw new Error(`Bad Request: ${errorBody.message || 'Invalid data'}`);
+                throw new HttpError(
+                    400,
+                    errorBody.message || "Invalid data",
+                    "Check your input and try again."
+                );
             } else if (response.status === 401) {
-                throw new Error('Unauthorized: Invalid token');
+                throw new HttpError(
+                    401,
+                    "Unauthorized: Invalid token",
+                    "Please log in again."
+                );
+            } else if (response.status === 409) {
+                throw new HttpError(
+                    409,
+                    errorBody.message || "Conflict occurred",
+                    "Try refreshing."
+                );
             } else {
-                throw new Error(`Request failed with status ${response.status}`);
+                throw new HttpError(
+                    response.status,
+                    "Unexpected error",
+                    "Please try again later."
+                );
             }
         }
-
         return response.json();
     } catch (error) {
-        throw error;
+        // If we already have an HttpError, just rethrow
+        if (error instanceof HttpError) throw error;
+
+        // Otherwise wrap it
+        throw new HttpError(500, (error as Error).message || "Unknown error");
     }
 }

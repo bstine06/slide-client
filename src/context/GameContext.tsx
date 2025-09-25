@@ -6,13 +6,14 @@ import React, {
     useEffect,
     useRef,
 } from "react";
-import { GameDto } from "../types/GameTypes";
+import { GameDto, Player } from "../types/GameTypes";
 import { useAuth } from "./AuthContext";
 import { useAppState } from "./StateContext";
 import {
     GameWebSocketMessageType,
     PlayerNameOnlyPayload,
     PlayerReadyPayload,
+    PlayerUpdatePayload,
     WebSocketMessage,
 } from "../types/WebSocketMessageTypes";
 
@@ -22,6 +23,7 @@ type GameContextType = {
     readyUp: (ready: boolean) => void;
     leave: () => void;
     loading: boolean;
+    updatePlayer: (update: PlayerUpdatePayload) => void;
 };
 
 export const GameContext = createContext<GameContextType | null>(null);
@@ -33,7 +35,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     const { username, token } = useAuth();
     const wsRef = useRef<WebSocket | null>(null);
 
-    // Open WS when a gameId is set
     useEffect(() => {
         if (!currentGameId || !token) return;
 
@@ -45,12 +46,20 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         ws.onopen = () => {
             console.log("WebSocket connected for game:", currentGameId);
             setLoading(false);
+
         };
 
-        // inside your ws.onmessage
         ws.onmessage = (event) => {
             const msg = JSON.parse(event.data);
-            const { type, payload, username } = msg;
+            const { type, payload } = msg;
+
+            if (type === "PONG") {
+                // server echoes clientSend back in payload
+                const clientSend = payload.clientSend;
+                const clientReceive = Date.now();
+                const roundTrip = clientReceive - clientSend;
+                return;
+            }
 
             setCurrentGame((prevGame) => {
                 if (!prevGame) return prevGame;
@@ -78,18 +87,18 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
                             ...prevGame,
                             players: {
                                 ...prevGame.players,
-                                [payload.username]: payload, // add or overwrite
+                                [payload.username]: payload,
                             },
                         };
 
-                    case "PLAYER_MOVE":
+                    case "PLAYER_UPDATE":
                         return {
                             ...prevGame,
                             players: {
                                 ...prevGame.players,
                                 [payload.username]: {
                                     ...prevGame.players[payload.username],
-                                    ...payload, // merge in new x/y/etc
+                                    ...payload,
                                 },
                             },
                         };
@@ -97,13 +106,16 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
                     case "PLAYER_LEAVE":
                         const updatedPlayers = { ...prevGame.players };
                         delete updatedPlayers[payload.username];
-                        return {
-                            ...prevGame,
-                            players: updatedPlayers,
-                        };
+                        return { 
+                            ...prevGame, 
+                            players: updatedPlayers };
+
+                    case "GAME_START":
+                        console.log(payload);
+                        return { ...payload };
 
                     case "GAME_STATE":
-                        return payload; // full state replaces everything
+                        return { ...payload };
 
                     default:
                         console.warn("Unhandled WS message type:", type);
@@ -120,37 +132,17 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
             }
         };
 
-        return () => ws.close();
+        return () => {
+            ws.close();
+        };
     }, [currentGameId, token]);
 
     const readyUp = (ready: boolean) => {
         try {
-            const type: GameWebSocketMessageType = "PLAYER_READY";
             if (!username) throw new Error("username is not set");
-            const payload: PlayerReadyPayload = { username, ready };
             const message: WebSocketMessage<PlayerReadyPayload> = {
-                type,
-                payload,
-            };
-            wsRef.current?.send(
-                JSON.stringify({
-                    type: "PLAYER_READY",
-                    payload: { username, ready },
-                })
-            );
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const leave = () => {
-        try {
-            const type: GameWebSocketMessageType = "PLAYER_LEAVE";
-            if (!username) throw new Error("username is not set");
-            const payload: PlayerNameOnlyPayload = { username };
-            const message: WebSocketMessage<PlayerNameOnlyPayload> = {
-                type,
-                payload,
+                type: "PLAYER_READY",
+                payload: { username, ready },
             };
             wsRef.current?.send(JSON.stringify(message));
         } catch (error) {
@@ -158,9 +150,39 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const leave = () => {
+        try {
+            if (!username) throw new Error("username is not set");
+            const message: WebSocketMessage<PlayerNameOnlyPayload> = {
+                type: "PLAYER_LEAVE",
+                payload: { username },
+            };
+            wsRef.current?.send(JSON.stringify(message));
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const updatePlayer = (update: PlayerUpdatePayload) => {
+        try {
+            if (!username) throw new Error("username is not set");
+            if (username !== update.username)
+                throw new Error("username in player update does not match authenticated username");
+            const message: WebSocketMessage<PlayerUpdatePayload> = {
+                type: "PLAYER_UPDATE",
+                payload: update
+            };
+            wsRef.current?.send(JSON.stringify(message));
+        } catch (error) {
+            console.error(error);
+            console.error(update.username);
+            console.error(username);
+        }
+    }
+
     return (
         <GameContext.Provider
-            value={{ currentGame, setCurrentGame, readyUp, leave, loading }}
+            value={{ currentGame, setCurrentGame, readyUp, leave, loading, updatePlayer }}
         >
             {children}
         </GameContext.Provider>

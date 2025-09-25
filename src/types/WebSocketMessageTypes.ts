@@ -1,8 +1,11 @@
+import { Direction } from "./GameTypes";
+
 export type GameWebSocketMessageType =
     | "GAME_STATE"
     | "PLAYER_READY"
     | "PLAYER_LEAVE"
-    | "PLAYER_MOVE"
+    | "GAME_START"
+    | "PLAYER_UPDATE"
     | "ERROR"
     | "PLAYER_JOIN";
 
@@ -20,8 +23,14 @@ export interface PlayerReadyPayload {
     ready: boolean;
 }
 
-export interface PlayerMovePayload {
+export interface PlayerUpdatePayload {
     username: string;
+    level: number;
     x: number;
     y: number;
+    vx: number;
+    vy: number;
+    nextMove: Direction;
+    stopX: number;
+    stopY: number;
 }

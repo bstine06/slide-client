@@ -1,35 +1,101 @@
 import { GameDto, Player } from "../../../types/GameTypes";
 
+import { PlayerUpdatePayload } from "../../../types/WebSocketMessageTypes";
+
+type EngineEventCallback = (update: PlayerUpdatePayload) => void;
+
 export class GameEngine {
     private state: GameDto;
+    private localUsername: string;
     private ACCELERATION: number = 1.02;
-    private VELOCITY: number = 0.8;
-    private VELOCITY_CAP: number = 5;
+    private VELOCITY: number = 1;
 
-    constructor(initialState: GameDto) {
+    private listeners: EngineEventCallback[] = [];
+    private lastSentLocal: PlayerUpdatePayload | null = null;
+
+
+    constructor(initialState: GameDto, localUsername: string) {
         this.state = initialState;
+        this.localUsername = localUsername;
     }
+
+    onPlayerUpdate(callback: EngineEventCallback) {
+        this.listeners.push(callback);
+    }
+
+    offPlayerUpdate(callback: EngineEventCallback) {
+        this.listeners = this.listeners.filter(l => l !== callback);
+    }
+
+    private emitPlayerUpdate(update: PlayerUpdatePayload) {
+        this.listeners.forEach(l => l(update));
+    }
+
+    private isEqualPlayerState(a: PlayerUpdatePayload, b: PlayerUpdatePayload): boolean {
+    return (
+        a.level === b.level &&
+        a.x === b.x &&
+        a.y === b.y &&
+        a.vx === b.vx &&
+        a.vy === b.vy &&
+        a.nextMove === b.nextMove &&
+        a.stopX === b.stopX &&
+        a.stopY === b.stopY
+    );
+}
 
     // Called once per frame
     update(delta: number) {
         const updatedPlayers: Record<string, Player> = {};
 
         for (const [username, p] of Object.entries(this.state.players)) {
-
             const maze = this.state.mazes[p.level];
+            this.VELOCITY = maze.board.length / 5 + (5/maze.board.length);
+            const velocityCap = this.VELOCITY * 5;
 
             //check for finish
-            if (Math.round(p.x) === maze.finishX && Math.round(p.y) === maze.finishY) {
+            if (
+                Math.round(p.x) === maze.finishX &&
+                Math.round(p.y) === maze.finishY
+            ) {
                 this.advanceLevel(p.username);
             }
+
+            if (username === this.localUsername) {
+    const current: PlayerUpdatePayload = {
+        username: p.username,
+        level: p.level,
+        x: p.x,
+        y: p.y,
+        vx: p.vx,
+        vy: p.vy,
+        nextMove: p.nextMove,
+        stopX: p.stopX!,
+        stopY: p.stopY!,
+    };
+
+    if (!this.lastSentLocal || !this.isEqualPlayerState(this.lastSentLocal, current)) {
+        this.lastSentLocal = { ...current }; // cache for next frame
+        this.emitPlayerUpdate(current);
+    }
+}
+            
 
             if (p.vx === 0 && p.vy === 0) {
                 if (p.nextMove) {
                     switch (p.nextMove) {
-                        case "LEFT": this.moveLeft(p.username, this.VELOCITY_CAP/3); break;
-                        case "RIGHT": this.moveRight(p.username, this.VELOCITY_CAP/3); break;
-                        case "UP": this.moveUp(p.username, this.VELOCITY_CAP/3); break;
-                        case "DOWN": this.moveDown(p.username, this.VELOCITY_CAP/3); break;
+                        case "LEFT":
+                            this.moveLeft(p.username, velocityCap / 3);
+                            break;
+                        case "RIGHT":
+                            this.moveRight(p.username, velocityCap / 3);
+                            break;
+                        case "UP":
+                            this.moveUp(p.username, velocityCap / 3);
+                            break;
+                        case "DOWN":
+                            this.moveDown(p.username, velocityCap / 3);
+                            break;
                     }
                     p.nextMove = null;
                 }
@@ -40,66 +106,37 @@ export class GameEngine {
             let newX = p.x + (p.vx ?? 0) * delta * 10;
             let newY = p.y + (p.vy ?? 0) * delta * 10;
 
-            // --- Collision + acceleration ---
-
             // Right
             if (p.vx > 0) {
-                const intX = Math.floor(newX);
-                const intY = Math.floor(newY);
-                if (intX > board.length - 2 || board[intY]?.[intX + 1] === 1) {
-                    updatedPlayers[username] = { ...p, x: intX, y: intY, vx: 0 };
-                    continue;
-                }
-                const newVx = Math.min(p.vx * this.ACCELERATION, this.VELOCITY_CAP);
-                newX = p.x + newVx * delta * 10;
-                updatedPlayers[username] = { ...p, x: newX, y: newY, vx: newVx, vy: p.vy };
-                continue;
+                const targetX = Math.min(newX, p.stopX!);
+                if (targetX >= p.stopX!) p.vx = 0; // stop at wall
+                newX = targetX;
             }
 
             // Left
             if (p.vx < 0) {
-                const intX = Math.ceil(newX);
-                const intY = Math.floor(newY);
-                if (intX < 1 || board[intY]?.[intX - 1] === 1) {
-                    updatedPlayers[username] = { ...p, x: intX, y: intY, vx: 0 };
-                    continue;
-                }
-                const newVx = Math.max(p.vx * this.ACCELERATION, -1 * this.VELOCITY_CAP);
-                newX = p.x + newVx * delta * 10;
-                updatedPlayers[username] = { ...p, x: newX, y: newY, vx: newVx, vy: p.vy };
-                continue;
+                const targetX = Math.max(newX, p.stopX!);
+                if (targetX <= p.stopX!) p.vx = 0;
+                newX = targetX;
             }
 
             // Down
             if (p.vy > 0) {
-                const intX = Math.floor(newX);
-                const intY = Math.floor(newY);
-                if (intY > board.length - 2 || board[intY + 1]?.[intX] === 1) {
-                    updatedPlayers[username] = { ...p, x: intX, y: intY, vy: 0 };
-                    continue;
-                }
-                const newVy = Math.min(p.vy * this.ACCELERATION, this.VELOCITY_CAP);
-                newY = p.y + newVy * delta * 10;
-                updatedPlayers[username] = { ...p, x: newX, y: newY, vy: newVy, vx: p.vx };
-                continue;
+                const targetY = Math.min(newY, p.stopY!);
+                if (targetY >= p.stopY!) p.vy = 0;
+                newY = targetY;
             }
 
             // Up
             if (p.vy < 0) {
-                const intX = Math.floor(newX);
-                const intY = Math.ceil(newY);
-                if (intY < 1 || board[intY - 1]?.[intX] === 1) {
-                    updatedPlayers[username] = { ...p, x: intX, y: intY, vy: 0 };
-                    continue;
-                }
-                const newVy = Math.max(p.vy * this.ACCELERATION, -1 * this.VELOCITY_CAP);
-                newY = p.y + newVy * delta * 10;
-                updatedPlayers[username] = { ...p, x: newX, y: newY, vy: newVy, vx: p.vx };
-                continue;
+                const targetY = Math.max(newY, p.stopY!);
+                if (targetY <= p.stopY!) p.vy = 0;
+                newY = targetY;
             }
 
             // Default (no collision, no movement)
             updatedPlayers[username] = { ...p, x: newX, y: newY };
+
         }
 
         this.state = {
@@ -116,32 +153,37 @@ export class GameEngine {
     // initialize movement if player is stationary
     moveLeft(username: string, velocity: number = this.VELOCITY): void {
         const p = this.state.players[username];
-        if (p.vx === 0 && p.vy === 0) {
+        if (p.vy === 0) {
             p.vx = -1 * velocity;
+            this.recalcStopPosition(p);
         } else {
             p.nextMove = "LEFT";
         }
     }
     moveRight(username: string, velocity: number = this.VELOCITY): void {
+        console.log("ENGINE MOVE RIGHT")
         const p = this.state.players[username];
-        if (p.vx === 0 && p.vy === 0) {
+        if (p.vy === 0) {
             p.vx = velocity;
+            this.recalcStopPosition(p);
         } else {
             p.nextMove = "RIGHT";
         }
     }
     moveUp(username: string, velocity: number = this.VELOCITY): void {
         const p = this.state.players[username];
-        if (p.vx === 0 && p.vy === 0) {
+        if (p.vx === 0) {
             p.vy = -1 * velocity;
+            this.recalcStopPosition(p);
         } else {
             p.nextMove = "UP";
         }
     }
     moveDown(username: string, velocity: number = this.VELOCITY): void {
         const p = this.state.players[username];
-        if (p.vx === 0 && p.vy === 0) {
+        if (p.vx === 0) {
             p.vy = velocity;
+            this.recalcStopPosition(p);
         } else {
             p.nextMove = "DOWN";
         }
@@ -153,7 +195,7 @@ export class GameEngine {
         p.y = maze.startY;
         p.vx = 0;
         p.vy = 0;
-        
+        console.log(p);
     }
     advanceLevel(username: string) {
         const p = this.state.players[username];
@@ -162,5 +204,73 @@ export class GameEngine {
         p.y = maze.startY;
         p.vx = 0;
         p.vy = 0;
+        p.stopX = null;
+        p.stopY = null;
+    }
+
+    private recalcStopPosition(p: Player) {
+        const board = this.state.mazes[p.level].board;
+
+        // --- Horizontal movement ---
+        if (p.vx > 0) {
+            // moving right
+            let stopX = board[0].length - 1;
+            for (let x = Math.floor(p.x) + 1; x < board[0].length; x++) {
+                const checkSpace = board[Math.floor(p.y)][x]
+                if (checkSpace === 1) {
+                    stopX = x - 1;
+                    break;
+                } else if (checkSpace === 3) {
+                    stopX = x;
+                    break;
+                }
+            }
+            p.stopX = stopX;
+        } else if (p.vx < 0) {
+            // moving left
+            let stopX = 0;
+            for (let x = Math.floor(p.x) - 1; x >= 0; x--) {
+                const checkSpace = board[Math.floor(p.y)][x]
+                if (checkSpace === 1) {
+                    stopX = x + 1;
+                    break;
+                } else if (checkSpace === 3) {
+                    stopX = x;
+                    break;
+                }
+            }
+            p.stopX = stopX;
+        }
+
+        // --- Vertical movement ---
+        if (p.vy > 0) {
+            // moving down
+            let stopY = board.length - 1;
+            for (let y = Math.floor(p.y) + 1; y < board.length; y++) {
+                const checkSpace = board[y][Math.floor(p.x)]
+                if (checkSpace === 1) {
+                    stopY = y - 1;
+                    break;
+                } else if (checkSpace === 3) {
+                    stopY = y;
+                    break;
+                }
+            }
+            p.stopY = stopY;
+        } else if (p.vy < 0) {
+            // moving up
+            let stopY = 0;
+            for (let y = Math.floor(p.y) - 1; y >= 0; y--) {
+                const checkSpace = board[y][Math.floor(p.x)]
+                if (checkSpace === 1) {
+                    stopY = y + 1;
+                    break;
+                } else if (checkSpace === 3) {
+                    stopY = y;
+                    break;
+                }
+            }
+            p.stopY = stopY;
+        }
     }
 }

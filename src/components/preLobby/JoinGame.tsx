@@ -3,11 +3,14 @@ import { useAppState } from "../../context/StateContext";
 import { useAuth } from "../../context/AuthContext";
 import { getGameById, joinGame } from "../../api/GameAPI";
 import { GameDto } from "../../types/GameTypes";
+import { HttpError } from "../../types/ErrorTypes";
 
 const JoinGame : React.FC = () => {
 
     const [input, setInput] = useState<string>("");
     const [errorMsg, setErrorMsg] = useState<string>("");
+    const [errorDetails, setErrorDetails] = useState<string>("");
+    const [errorAdvice, setErrorAdvice] = useState<string>("");
     const {setCurrentGameId, setAppState} = useAppState();
     const {token} = useAuth();
 
@@ -22,9 +25,21 @@ const JoinGame : React.FC = () => {
             await joinGame(game.gameId, token);
             setCurrentGameId(game.gameId);
             setAppState("GAME");
-        } catch (error) {
+        } catch (error : any) {
             console.error("Error fetching game: ", error);
-            setErrorMsg("invalid game id");
+
+            setErrorMsg("Could not join game:");
+
+            if (error instanceof HttpError) {
+                setErrorDetails(error.message || JSON.stringify(error));
+                error.advice && setErrorAdvice(error.advice);
+            } else if (error instanceof Error) {
+                // Regular JS/TS error
+                setErrorDetails(error.message);
+            } else {
+                // String, number, etc.
+                setErrorDetails(String(error));
+            }
         }
     }
 
@@ -36,6 +51,8 @@ const JoinGame : React.FC = () => {
             <input type="text" onChange={handleInputChange}></input>
             <button type="button" onClick={handleSubmit}>Join</button>
             {errorMsg && <p>{errorMsg}</p>}
+            {errorDetails && <p>{errorDetails}</p>}
+            {errorAdvice && <p>{errorAdvice}</p>}
         </>
     )
 

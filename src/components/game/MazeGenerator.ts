@@ -1,8 +1,4 @@
-import {
-    Direction,
-    DirectionNonNull,
-    Maze
-} from "../../types/GameTypes";
+import { Direction, DirectionNonNull, Maze } from "../../types/GameTypes";
 import { DensityType } from "../../types/MazeGenerationTypes";
 
 interface MovementDelta {
@@ -47,8 +43,6 @@ class MazeGenerator {
         let isDeadEnd = false;
 
         for (let i = 0; i < length; i++) {
-            // choose a random direction
-            console.log(previousDirection);
             let direction: DirectionNonNull = "UP"; // placeholder value to satisfy compiler
             try {
                 direction = this.getRandomDirection({
@@ -92,9 +86,6 @@ class MazeGenerator {
                 probeY += directions[direction].dy;
             }
 
-            console.log(`yxset: ${y}, ${x}`);
-            console.log(`probe: ${probeY},${probeX}`);
-
             // DONT PUT A PIVOT POINT IN A PATH
             // AND DONT PUT A PATH IN A PIVOT POINT
 
@@ -102,7 +93,6 @@ class MazeGenerator {
             let d = Math.ceil(
                 Math.random() * (Math.abs(probeY - y) + Math.abs(probeX - x))
             );
-            console.log(d);
             while (d > 0) {
                 // traverse and add each visited cell to the pathSet
                 // if a block was already placed there, end this traversal
@@ -159,8 +149,6 @@ class MazeGenerator {
 
         let finishY = y;
         let finishX = x;
-        console.log(finishY);
-        console.log(finishX);
         board[finishY][finishX] = 3;
 
         // fill board with noise, excluding the defined necessary path & walls
@@ -174,13 +162,12 @@ class MazeGenerator {
             }
         }
 
-        console.log(pathSet);
-
-        console.table(board);
-
         return {
-            board, startX, startY, finishX, finishY
-            
+            board,
+            startX,
+            startY,
+            finishX,
+            finishY,
         };
     }
 
@@ -216,26 +203,40 @@ class MazeGenerator {
         return directions[index];
     }
 
-    static generateMazeArray(count: number, dimension: number, densityType: DensityType, enforceShortestPathGreaterThan : number = 0) {
-        if (dimension <= 4 && enforceShortestPathGreaterThan) throw new Error("Cannot enforce shortest path on tiny mazes");
-        if (enforceShortestPathGreaterThan > dimension / 2) throw new Error("Cannot enforce shortest path greater than 1/2 of dimension");
-        let mazeArray : Maze[] = [];
+    static generateMazeArray(
+        count: number,
+        dimension: number,
+        densityType: DensityType,
+        enforceShortestPathGreaterThan: number = 0
+    ) {
+        if (dimension <= 4 && enforceShortestPathGreaterThan)
+            throw new Error("Cannot enforce shortest path on tiny mazes");
+        if (enforceShortestPathGreaterThan > dimension / 2)
+            throw new Error(
+                "Cannot enforce shortest path greater than 1/2 of dimension"
+            );
+        let mazeArray: Maze[] = [];
         let startX = Math.floor(Math.random() * dimension);
         let startY = Math.floor(Math.random() * dimension);
         for (let i = 0; i < count; i++) {
             let density = 0.5;
             switch (densityType) {
                 case "BIAS_DENSE_AND_SPARSE":
-                    density = Math.random() > 0.5 ? 
-                        Math.pow(Math.random(), 0.25) :
-                        Math.pow(Math.random(), 4);
-
+                    density =
+                        Math.random() > 0.5
+                            ? Math.pow(Math.random(), 0.25)
+                            : Math.pow(Math.random(), 4);
+                    break;
+                case "SPARSE":
+                    density = Math.pow(Math.random(), 4);
+                case "DENSE":
+                    density = Math.pow(Math.random(), 0.25);
             }
             let maze = this.generateMaze(dimension, startY, startX, density);
-            if (enforceShortestPathGreaterThan > 1) {
-                while (this.bfsShortestPath(maze) <= enforceShortestPathGreaterThan) {
-                    maze = this.generateMaze(dimension, startY, startX);
-                }
+            while (
+                this.bfsShortestPath(maze) <= enforceShortestPathGreaterThan
+            ) {
+                maze = this.generateMaze(dimension, startY, startX);
             }
             mazeArray.push(maze);
             startX = maze.finishX;
@@ -244,48 +245,120 @@ class MazeGenerator {
         return mazeArray;
     }
 
-    static bfsShortestPath(
-        maze : Maze
-    ): number {
-        const n = maze.board.length;
-        const visited = Array.from({ length: n }, () => Array(n).fill(false));
+    static bfsShortestPath(maze: Maze): number {
+        const { board, startX, startY, finishX, finishY } = maze;
+        const dimension = board.length;
+        const queue: Array<[number, number, number]> = [[startY, startX, 0]];
+        const visited: boolean[][] = Array.from({ length: dimension }, () =>
+            Array(dimension).fill(false)
+        );
+        visited[startY][startX] = true;
 
-        const queue: { y: number; x: number; dist: number }[] = [];
-        queue.push({ y: maze.startY, x: maze.startX, dist: 0 });
-        visited[maze.startY][maze.startX] = true;
-
-        const dirs = [
-            { dy: -1, dx: 0 }, // up
-            { dy: 1, dx: 0 }, // down
-            { dy: 0, dx: -1 }, // left
-            { dy: 0, dx: 1 }, // right
+        const directions = [
+            { dx: -1, dy: 0 }, //left
+            { dx: 1, dy: 0 }, //right
+            { dx: 0, dy: -1 }, //up
+            { dx: 0, dy: 1 }, //down
         ];
 
         while (queue.length > 0) {
-            const { y, x, dist } = queue.shift()!;
+            let [y, x, dist] = queue.shift()!;
 
-            if (y === maze.finishY && x === maze.finishX) {
-                return dist; // shortest path found
+            if (y === finishY && x === finishX) {
+                return dist;
             }
 
-            for (const { dy, dx } of dirs) {
-                const ny = y + dy;
-                const nx = x + dx;
-                if (
-                    ny >= 0 &&
-                    ny < n &&
-                    nx >= 0 &&
-                    nx < n &&
-                    !visited[ny][nx] &&
-                    maze.board[ny][nx] !== 1 // 1 = wall in your scheme
-                ) {
-                    visited[ny][nx] = true;
-                    queue.push({ y: ny, x: nx, dist: dist + 1 });
+            // find all possible moves from this spot
+            for (const {dx, dy} of directions) {
+                let {stopY, stopX} = this.findStopPosition(
+                    board,
+                    y,
+                    x,
+                    dy,
+                    dx
+                );
+                if (!visited[stopY][stopX]) {
+                    visited[stopY][stopX] = true;
+                    queue.push([stopY, stopX, dist + 1]);
                 }
             }
         }
 
-        return Infinity; // no path found
+        return Infinity;
+    }
+
+    static findStopPosition(
+        board: number[][],
+        py: number,
+        px: number,
+        dy: number,
+        dx: number
+    ) : {stopY: number, stopX: number} {
+        let stopX = px;
+        let stopY = py;
+
+        // --- Horizontal movement ---
+        if (dx > 0) {
+            // moving right
+            stopX = board[0].length - 1;
+            for (let x = px + 1; x < board[0].length; x++) {
+                const checkSpace = board[py][x];
+                if (checkSpace === 1) {
+                    stopX = x - 1;
+                    break;
+                } else if (checkSpace === 3) {
+                    stopX = x;
+                    break;
+                }
+            }
+        } else if (dx < 0) {
+            // moving left
+            stopX = 0;
+            for (let x = px - 1; x >= 0; x--) {
+                const checkSpace = board[py][x];
+                if (checkSpace === 1) {
+                    stopX = x + 1;
+                    break;
+                } else if (checkSpace === 3) {
+                    stopX = x;
+                    break;
+                }
+            }
+        }
+
+        // --- Vertical movement ---
+        if (dy > 0) {
+            // moving down
+            stopY = board.length - 1;
+            for (let y = py + 1; y < board.length; y++) {
+                const checkSpace = board[y][px];
+                if (checkSpace === 1) {
+                    stopY = y - 1;
+                    break;
+                } else if (checkSpace === 3) {
+                    stopY = y;
+                    break;
+                }
+            }
+        } else if (dy < 0) {
+            // moving up
+            stopY = 0;
+            for (let y = py - 1; y >= 0; y--) {
+                const checkSpace = board[y][Math.floor(px)];
+                if (checkSpace === 1) {
+                    stopY = y + 1;
+                    break;
+                } else if (checkSpace === 3) {
+                    stopY = y;
+                    break;
+                }
+            }
+        }
+
+        return {
+            stopY, 
+            stopX
+        }
     }
 }
 

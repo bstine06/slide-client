@@ -10,6 +10,7 @@ interface GameControllerProps {
 const GameController: React.FC<GameControllerProps> = ({ engine, username }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      console.log(e.key);
       switch (e.key) {
         case "ArrowLeft":
           engine.moveLeft(username);

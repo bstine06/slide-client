@@ -23,18 +23,20 @@ export const GameplayTest: React.FC = () => {
                     y: 1,
                     vx: 0,
                     vy: 0,
-                    nextMove: null
+                    nextMove: null,
+                    stopX: null,
+                    stopY: null
                 },
         },
         mazes: [],
     };
 
-    const [game, setGame] = useState<GameDto>(mockGame);
-    const [engine] = useState(() => new GameEngine(mockGame));
+    const [game, setGame] = useState<GameDto | null>(mockGame);
+    const [engine] = useState(() => new GameEngine(mockGame, "bstine06"));
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        mockGame.mazes = (MazeGenerator.generateMazeArray(20, 16, "BIAS_DENSE_AND_SPARSE", 8));
+        mockGame.mazes = MazeGenerator.generateMazeArray(25, 16, "SPARSE", 3);
         mockGame.players["bstine06"].x = mockGame.mazes[0].startX;
         mockGame.players["bstine06"].y = mockGame.mazes[0].startY;
         setLoading(false);
@@ -44,7 +46,7 @@ export const GameplayTest: React.FC = () => {
     return (
         <>
         <h1>Canvas Test</h1>
-        {!loading && <GameCanvas game={game} playerName="bstine06"/>}
+        {!loading && game && <GameCanvas game={game} playerName="bstine06"/>}
         <GameController engine={engine} username="bstine06"/>
         </>
     );

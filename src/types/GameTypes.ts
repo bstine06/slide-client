@@ -35,4 +35,6 @@ export interface Player {
     vx: number;
     vy: number;
     nextMove: Direction;
+    stopX: number | null;
+    stopY: number | null;
 }

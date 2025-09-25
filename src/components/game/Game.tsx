@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
 import { GameProvider, useGameState } from "../../context/GameContext";
 import Lobby from "./Lobby";
-import PlayGame from "./PlayGame";
 import { useAuth } from "../../context/AuthContext";
 import { getGame, joinGame } from "../../api/GameAPI";
 import { useAppState } from "../../context/StateContext";
 import { GameDto } from "../../types/GameTypes";
+import { GameContainer } from "./gameplay/GameContainer";
 
 const Game = () => {
 
@@ -36,7 +36,7 @@ const Game = () => {
         <>
             <p>GAME</p>
             {currentGame?.inProgress === false && <Lobby />}
-            {currentGame?.inProgress === true && <PlayGame />}
+            {currentGame?.inProgress === true && <GameContainer />}
         </>
     )
 }

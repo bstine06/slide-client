@@ -1,1 +1,1 @@
-export type DensityType = "BIAS_DENSE_AND_SPARSE"
+export type DensityType = "BIAS_DENSE_AND_SPARSE" | "SPARSE" | "DENSE"

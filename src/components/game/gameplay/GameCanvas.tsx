@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { renderGame } from "./Renderer";
+import { renderGame } from "./render/Renderer";
 import { GameDto } from "../../../types/GameTypes";
 
 interface GameCanvasProps {

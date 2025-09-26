@@ -65,3 +65,25 @@ export async function checkEmailAvailability(email: string): Promise<boolean> {
       throw error;
     }
   }
+
+  export async function updateUserColor(username: string, color: string, token: string): Promise<UserProfileResponse> {
+    try {
+      const response = await fetch(`${BASE_URL}/${username}/color`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({'color':color})
+      });
+  
+      if (!response.ok) {
+        throw new Error('Update user color failed');
+      }
+  
+      return await response.json();
+    } catch (error) {
+      console.error('Error while updating user color:', error);
+      throw error;
+    }
+  }

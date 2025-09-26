@@ -15,10 +15,12 @@ export interface ResponseDto<T> {
     content: T
 }
 
+export type GamePhase = "PRE_GAME" | "IN_PROGRESS" | "POST_GAME";
+
 export interface GameDto {
     gameId: string;
     hostUsername: string;
-    inProgress: boolean;
+    phase: GamePhase;
     players: Record<string, Player>;
     mazes: Maze[];
 }

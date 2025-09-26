@@ -7,18 +7,17 @@ import GameWrapper from "./components/game/GameWrapper";
 
 import { useAuth } from "./context/AuthContext";
 import { useAppState } from "./context/StateContext";
-import Lobby from "./components/game/Lobby";
 import CreateLobby from "./components/preLobby/CreateLobby";
 import Preload from "./components/load/Preload";
-import { GameProvider } from "./context/GameContext";
 import JoinGame from "./components/preLobby/JoinGame";
-import GameCanvas from "./components/game/gameplay/GameCanvas";
 import { GameplayTest } from "./components/game/gameplay/GameplayTest";
+import Customize from "./components/menu/Customize";
+
 
 const App: React.FC = () => {
 
     const { isAuthenticated } = useAuth();
-    const { appState, setAppState } = useAppState();
+    const { appState } = useAppState();
 
     return (
         <>
@@ -26,6 +25,7 @@ const App: React.FC = () => {
             {appState === "LOGIN" && <Login />}
             {appState === "REGISTER" && <Register/ >}
             {appState === "MENU" && <Menu />}
+            {appState === "CUSTOMIZE" && <Customize />}
             {appState === "CREATE" && <CreateLobby />}
             {appState === "JOIN" && <JoinGame />}
             {appState === "GAME" && <GameWrapper />}

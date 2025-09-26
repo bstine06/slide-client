@@ -242,6 +242,21 @@ class MazeGenerator {
             startX = maze.finishX;
             startY = maze.finishY;
         }
+
+        //generate an unfinishable buffer maze for the last maze (after finish) to prevent rendering issues
+        const bufferBoard = Array.from({ length: dimension }, () =>
+            Array(dimension).fill(0)
+        );
+        bufferBoard[startY][startX] = 2;
+        const bufferMaze : Maze = {
+            board: bufferBoard, 
+            startX,
+            startY,
+            finishX: -1,
+            finishY: -1
+        }
+        mazeArray.push(bufferMaze);
+
         return mazeArray;
     }
 

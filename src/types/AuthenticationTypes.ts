@@ -22,4 +22,6 @@ export interface CredentialsCheckResponse {
 export interface UserProfileResponse {
     username: string;
     email: string;
+    currentGameId: string;
+    color: string;
 }

@@ -12,7 +12,7 @@ export const GameplayTest: React.FC = () => {
     const mockGame: GameDto = {
         gameId: "4f46b22e-a347-411a-85dc-916b267f8094",
         hostUsername: "bstine06",
-        inProgress: false,
+        phase: "IN_PROGRESS",
         players: {
             "bstine06":
                 {

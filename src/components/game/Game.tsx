@@ -6,6 +6,7 @@ import { getGame, joinGame } from "../../api/GameAPI";
 import { useAppState } from "../../context/StateContext";
 import { GameDto } from "../../types/GameTypes";
 import { GameContainer } from "./gameplay/GameContainer";
+import PostGame from "./gameplay/PostGame";
 
 const Game = () => {
 
@@ -35,8 +36,9 @@ const Game = () => {
     return (
         <>
             <p>GAME</p>
-            {currentGame?.inProgress === false && <Lobby />}
-            {currentGame?.inProgress === true && <GameContainer />}
+            {currentGame?.phase === "PRE_GAME" && <Lobby />}
+            {currentGame?.phase === "IN_PROGRESS" && <GameContainer />}
+            {currentGame?.phase === "POST_GAME" && <PostGame />}
         </>
     )
 }

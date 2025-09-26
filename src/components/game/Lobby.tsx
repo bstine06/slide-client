@@ -4,6 +4,7 @@ import { useAppState } from "../../context/StateContext";
 import { deleteGame, leaveGame } from "../../api/GameAPI";
 import { useGameState } from "../../context/GameContext";
 import GameContainer from "./gameplay/GameContainer";
+import "../../styles/menu.css";
 
 const Lobby: React.FC = () => {
     const { appState, setAppState } = useAppState();
@@ -60,17 +61,19 @@ const Lobby: React.FC = () => {
                 <h3>Game Lobby</h3>
                 <h5>Game ID: {currentGame.gameId}</h5>
             </div>
-            { !currentGame.inProgress &&
+            {currentGame.phase === "PRE_GAME" && (
                 <>
                     <div className="players-list">{renderPlayers()}</div>
-                    <button onClick={handleReady}>
-                        {username && currentGame.players[username]?.ready
-                            ? "Unready"
-                            : "Ready up"}
-                    </button>
+                    <div className="buttons">
+                        <button onClick={handleReady}>
+                            {username && currentGame.players[username]?.ready
+                                ? "Unready"
+                                : "Ready up"}
+                        </button>
+                        <button onClick={handleLeave}>Leave</button>
+                    </div>
                 </>
-            }
-            <button onClick={handleLeave}>Leave</button>
+            )}
         </>
     );
 };

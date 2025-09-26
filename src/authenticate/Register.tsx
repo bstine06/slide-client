@@ -7,7 +7,7 @@ import { useAppState } from "../context/StateContext";
 import { isLongEnough, isNonEmpty, isValidEmail, isValidPassword } from "../utils/validators";
 import { AuthResponse } from "../types/AuthenticationTypes";
 
-const Register = () => {
+const Register : React.FC = () => {
 
     const [email, setEmail] = useState<string>("");
     const [username, setUsername] = useState<string>("");

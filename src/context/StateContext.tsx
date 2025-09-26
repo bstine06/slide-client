@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-type AppState = "PRELOAD" | "LOGIN" | "REGISTER" | "MENU" | "GAME" | "CREATE" | "JOIN"
+type AppState = "PRELOAD" | "LOGIN" | "REGISTER" | "MENU" | "CUSTOMIZE" | "GAME" | "CREATE" | "JOIN" | "POSTGAME"
     //TODO remove this once canvas is actually implemented
     | "GAMEPLAY_TEST";
 

@@ -6,11 +6,13 @@ import { useGameState } from "../../../context/GameContext";
 import { startGameLoop } from "./GameLoop";
 import { GameEngine } from "./GameEngine";
 import { useAuth } from "../../../context/AuthContext";
+import { useAppState } from "../../../context/StateContext";
 
 export const GameContainer: React.FC = () => {
 
     const {currentGame, updatePlayer }  = useGameState();
     const {username} = useAuth();
+    const {setAppState} = useAppState();
     
     const [engine, setEngine] = useState<GameEngine | null>(null);
     const [renderState, setRenderState] = useState<GameDto | null>(currentGame);

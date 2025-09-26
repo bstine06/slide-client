@@ -31,6 +31,10 @@ const Menu = () => {
         setAppState("JOIN");
     }
 
+    const goToCustomize = () => {
+        setAppState("CUSTOMIZE");
+    }
+
     const handleLogout = () => {
         logout();
         setAppState("LOGIN");
@@ -45,14 +49,16 @@ const Menu = () => {
         <>
             <div>
                 <h1>SLIDE</h1>
+                <h2>{username}</h2>
             </div>
             <div className="buttons">
                 <button onClick={createLobby}>CREATE LOBBY</button>
                 <button onClick={joinGame}>JOIN GAME</button>
-                <button onClick={handleLogout}>LOG OUT</button>
+                <button onClick={goToCustomize}>CUSTOMIZE</button>
 
                 {/* TODO remove this once canvas is actually implemented */}
-                <button onClick={handleGameCanvasTest}>Test Gameplay</button>
+                <button onClick={handleGameCanvasTest}>TEST GAMEPLAY (SOLO)</button>
+                <button onClick={handleLogout}>LOG OUT</button>
             </div>
         </>
     )

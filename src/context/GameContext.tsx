@@ -118,6 +118,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
                     case "GAME_STATE":
                         return { ...payload };
 
+                    case "GAME_END":
+                        return { ...payload };
+
                     default:
                         console.warn("Unhandled WS message type:", type);
                         return prevGame;

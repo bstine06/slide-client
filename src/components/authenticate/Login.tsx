@@ -1,14 +1,17 @@
 import React, { useState } from "react";
-import '../styles/login.css';
-import { authenticateUser } from "../api/AuthenticateAPI";
-import { useAuth } from "../context/AuthContext";
-import { useAppState } from "../context/StateContext";
+import '../../styles/login.css';
+import { authenticateUser } from "../../api/AuthenticateAPI";
+import { useAuth } from "../../context/AuthContext";
+import { useAppState } from "../../context/StateContext";
+import { HttpError } from "../../types/ErrorTypes";
 
 const Login = () => {
 
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
-    const [error, setError] = useState<string>("");
+    const [errorMsg, setErrorMsg] = useState<string>("");
+    const [errorDetails, setErrorDetails] = useState<string>("");
+    const [errorAdvice, setErrorAdvice] = useState<string>("");
     const { setToken } = useAuth();
     const { setAppState } = useAppState();
 
@@ -19,9 +22,20 @@ const Login = () => {
             const jwtToken = await authenticateUser({ username, password });
             setToken(jwtToken.token);
             setAppState("MENU");
-        } catch (error) {
-            setError('Incorrect username or password');
-        }
+        } catch (error : any) {
+                    setErrorMsg("Could not log in:");
+        
+                    if (error instanceof HttpError) {
+                        setErrorDetails(error.message || JSON.stringify(error));
+                        error.advice && setErrorAdvice(error.advice);
+                    } else if (error instanceof Error) {
+                        // Regular JS/TS error
+                        setErrorDetails(error.message);
+                    } else {
+                        // String, number, etc.
+                        setErrorDetails(String(error));
+                    }
+                }
     }
 
     return (
@@ -51,7 +65,9 @@ const Login = () => {
                         onChange={(e) => setPassword(e.target.value)}
                     />
                     <button type="submit">Submit</button>
-                    <p className="error-message">{error}</p>
+                    {errorMsg && <p className="error-message">{errorMsg}</p>}
+                    {errorDetails && <p className="error-message">{errorDetails}</p>}
+                    {errorAdvice && <p className="error-message">{errorAdvice}</p>}
                 </form>
                 <a onClick={() => setAppState("REGISTER")} className="link">I don't have an account</a>
             </div>

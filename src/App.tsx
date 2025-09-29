@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import "./style.css";
-import Login from "./authenticate/Login";
-import Register from "./authenticate/Register";
+import Login from "./components/authenticate/Login";
+import Register from "./components/authenticate/Register";
 import Menu from "./components/menu/Menu";
 import GameWrapper from "./components/game/GameWrapper";
 

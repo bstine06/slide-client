@@ -1,11 +1,16 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
+const Dotenv = require('dotenv-webpack');
+
 
 module.exports = {
   mode: 'development', // Change to 'production' for builds
   entry: './src/index.js',
   devServer: {
-    port: 3000, // Change this from 8080 to 3000
+    host: 'localhost',
+    port: 3000,
+    allowedHosts: 'all',
     open: true,
     historyApiFallback: true,
     hot: true,
@@ -31,6 +36,10 @@ module.exports = {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
       },
+      {
+        test: /\.(bmp|png|jpe?g|gif)$/i,
+        type: 'asset/resource', // Webpack 5 built-in
+      },
     ],
   },
   resolve: {
@@ -40,5 +49,6 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './src/index.html',
     }),
+    new Dotenv()
   ],
 };

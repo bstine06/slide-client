@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { renderGame } from "./render/Renderer";
+import { renderGame } from "../../../render/Renderer";
 import { GameDto } from "../../../types/GameTypes";
 
 interface GameCanvasProps {
@@ -25,6 +25,7 @@ const GameCanvas : React.FC<GameCanvasProps> = ({game, playerName}) => {
     return (
         <>
             <h1>Game Canvas</h1>
+            <h2>{game.players[playerName]?.level}/{game.mazes.length! - 1}</h2>
             <canvas ref={canvasRef} width={WIDTH} height={HEIGHT} />
         </>
     )

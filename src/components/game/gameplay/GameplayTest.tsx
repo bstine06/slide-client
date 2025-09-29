@@ -26,7 +26,7 @@ export const GameplayTest: React.FC = () => {
                     nextMove: null,
                     stopX: null,
                     stopY: null,
-                    color: "#9999FF"
+                    color: "#9900FF"
                 },
         },
         mazes: [],

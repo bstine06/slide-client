@@ -16,6 +16,12 @@ import {
     WebSocketMessage,
 } from "../types/WebSocketMessageTypes";
 
+const websocketUrl = process.env.REACT_APP_WEBSOCKET_URL;
+
+// //TODO configure this so it comes from env
+// const websocketUrl = "ws://192.168.68.67:8443"
+
+
 type GameContextType = {
     currentGame: GameDto | null;
     setCurrentGame: (game: GameDto) => void;
@@ -38,7 +44,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         if (!currentGameId || !token) return;
 
         const ws = new WebSocket(
-            `ws://localhost:8443/ws/game?token=${token}&gameId=${currentGameId}`
+            `${websocketUrl}/ws/game?token=${token}&gameId=${currentGameId}`
         );
         wsRef.current = ws;
 

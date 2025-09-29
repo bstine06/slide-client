@@ -10,6 +10,7 @@ const CreateLobby: React.FC = () => {
     const { token, username } = useAuth();
 
     const [roundsCount, setRoundsCount] = useState<number>(5);
+    const [dimension, setDimension] = useState<number>(10);
 
     const handleLeave = () => {
         // TODO: delete game on backend
@@ -20,13 +21,11 @@ const CreateLobby: React.FC = () => {
         try {
             if (token && username) {
 
-                const DIMENSION = 10;
-
                 const generatedMazes = MazeGenerator.generateMazeArray(
                     roundsCount, 
-                    DIMENSION, 
-                    "BIAS_DENSE_AND_SPARSE",
-                    3);
+                    dimension, 
+                    "DENSE",
+                    Math.floor(dimension/2.5) + 1);
 
                 const createGamePayload : CreateGamePayload = {
                     mazes: generatedMazes
@@ -52,6 +51,14 @@ const CreateLobby: React.FC = () => {
                 type="number"
                 value={roundsCount}
                 onChange={(e) => setRoundsCount(parseInt(e.target.value, 10))}
+            />
+            <h2>maze size: {dimension}x{dimension}</h2>
+            <input
+                type="number"
+                value={dimension}
+                min={6}
+                max={50}
+                onChange={(e) => setDimension(parseInt(e.target.value, 10))}
             />
             <button onClick={handleCreateGame}>Create Game</button>
             <button onClick={handleLeave}>Cancel</button>

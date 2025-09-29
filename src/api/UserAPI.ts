@@ -1,7 +1,11 @@
 import { CredentialsCheckResponse, UserProfileResponse } from "../types/AuthenticationTypes";
 import { ResponseDto } from "../types/GameTypes";
 
-const BASE_URL = 'http://localhost:8443/api/v1/user';
+const backendUrl = process.env.REACT_APP_BACKEND_URL;
+const BASE_URL = `${backendUrl}/api/v1/user`;
+
+// //TODO configure this so it comes from env
+// const BASE_URL = "http://192.168.68.67:8443/api/v1/user"
 
 export async function checkUsernameAvailability(username: string): Promise<boolean> {
     try {

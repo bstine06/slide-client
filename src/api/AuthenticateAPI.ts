@@ -1,4 +1,8 @@
-const BASE_URL = 'http://localhost:8443/api/v1/auth';
+const backendUrl = process.env.REACT_APP_BACKEND_URL;
+const BASE_URL = `${backendUrl}/api/v1/auth`;
+
+// //TODO configure this so it comes from env
+// const BASE_URL = "http://192.168.68.67:8443/api/v1/auth"
 
 import { AuthenticatePayload, RegisterPayload, AuthResponse } from "../types/AuthenticationTypes";
 

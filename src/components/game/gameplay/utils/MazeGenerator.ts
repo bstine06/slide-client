@@ -1,5 +1,5 @@
-import { Direction, DirectionNonNull, Maze } from "../../types/GameTypes";
-import { DensityType } from "../../types/MazeGenerationTypes";
+import { Direction, DirectionNonNull, Maze } from "../../../../types/GameTypes";
+import { DensityType } from "../../../../types/MazeGenerationTypes";
 
 interface MovementDelta {
     dx: number;
@@ -168,6 +168,7 @@ class MazeGenerator {
             startY,
             finishX,
             finishY,
+            theme: "SEWER"
         };
     }
 
@@ -256,7 +257,8 @@ class MazeGenerator {
             startX,
             startY,
             finishX: -1,
-            finishY: -1
+            finishY: -1,
+            theme: "SEWER"
         }
         mazeArray.push(bufferMaze);
 

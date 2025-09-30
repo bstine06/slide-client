@@ -3,7 +3,7 @@ import "./style.css";
 import Login from "./components/authenticate/Login";
 import Register from "./components/authenticate/Register";
 import Menu from "./components/menu/Menu";
-import GameWrapper from "./components/game/GameWrapper";
+import Game from "./components/game/Game";
 
 import { useAuth } from "./context/AuthContext";
 import { useAppState } from "./context/StateContext";
@@ -12,6 +12,7 @@ import Preload from "./components/load/Preload";
 import JoinGame from "./components/preLobby/JoinGame";
 import { GameplayTest } from "./components/game/gameplay/GameplayTest";
 import Customize from "./components/menu/Customize";
+import { GameProvider } from "./context/GameContext";
 
 
 const App: React.FC = () => {
@@ -28,7 +29,11 @@ const App: React.FC = () => {
             {appState === "CUSTOMIZE" && <Customize />}
             {appState === "CREATE" && <CreateLobby />}
             {appState === "JOIN" && <JoinGame />}
-            {appState === "GAME" && <GameWrapper />}
+            {appState === "GAME" && 
+                <GameProvider>
+                    <Game />
+                </GameProvider>
+            }
             {appState === "GAMEPLAY_TEST" && <GameplayTest />}
         </>
     );

@@ -30,21 +30,21 @@ export class WallDrawable {
     // Key = "w" + 4-bit binary string
     const sources: Record<string, string> = {
       w0000: w0000bmp,
-      w0001: w0001bmp,
-      w0010: w0010bmp,
-      w0011: w0011bmp,
-      w0100: w0100bmp,
-      w0101: w0101bmp,
-      w0110: w0110bmp,
+      // w0001: w0001bmp,
+      // w0010: w0010bmp,
+      // w0011: w0011bmp,
+      // w0100: w0100bmp,
+      // w0101: w0101bmp,
+      // w0110: w0110bmp,
       w0111: w0111bmp,
-      w1000: w1000bmp,
-      w1001: w1001bmp,
-      w1010: w1010bmp,
-      w1011: w1011bmp,
-      w1100: w1100bmp,
-      w1101: w1101bmp,
-      w1110: w1110bmp,
-      w1111: w1111bmp,
+      // w1000: w1000bmp,
+      // w1001: w1001bmp,
+      // w1010: w1010bmp,
+      // w1011: w1011bmp,
+      // w1100: w1100bmp,
+      // w1101: w1101bmp,
+      // w1110: w1110bmp,
+      // w1111: w1111bmp,
     };
 
     for (const [key, src] of Object.entries(sources)) {
@@ -70,8 +70,8 @@ export class WallDrawable {
     if (!this.loaded) {
       await this.loadPromise;
     }
-    const img = this.images[wallType] ?? this.images.w0000;
+    const img = this.images[wallType] ?? null;
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(img, this.x, this.y, this.w, this.h);
+    img && ctx.drawImage(img, this.x, this.y, this.w, this.h);
   }
 }

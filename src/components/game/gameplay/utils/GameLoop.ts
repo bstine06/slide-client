@@ -1,4 +1,4 @@
-import { GameDto } from "../../../types/GameTypes";
+import { GameDto } from "../../../../types/GameTypes";
 import { GameEngine } from "./GameEngine";
 
 /**

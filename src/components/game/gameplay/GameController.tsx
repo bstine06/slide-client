@@ -1,6 +1,6 @@
 // GameController.tsx
 import { useEffect } from "react";
-import { GameEngine } from "./GameEngine";
+import { GameEngine } from "./utils/GameEngine";
 
 interface GameControllerProps {
   engine: GameEngine;

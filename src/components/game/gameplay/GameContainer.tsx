@@ -3,8 +3,8 @@ import GameCanvas from "./GameCanvas";
 import { GameDto } from "../../../types/GameTypes";
 import GameController from "./GameController";
 import { useGameState } from "../../../context/GameContext";
-import { startGameLoop } from "./GameLoop";
-import { GameEngine } from "./GameEngine";
+import { startGameLoop } from "./utils/GameLoop";
+import { GameEngine } from "./utils/GameEngine";
 import { useAuth } from "../../../context/AuthContext";
 import { useAppState } from "../../../context/StateContext";
 

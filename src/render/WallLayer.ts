@@ -1,5 +1,4 @@
 import { WallDrawable } from "./WallDrawable";
-import { buildGoalCache } from "./GoalDrawable";
 import { PathDrawable } from "./PathDrawable";
 
 export function buildWallLayer(
@@ -11,21 +10,7 @@ export function buildWallLayer(
     offscreen.height = board[0].length * cellSize;
     const ctx = offscreen.getContext("2d")!;
 
-    const goalCache = buildGoalCache(cellSize);
-
     generateWalls(board, cellSize, ctx);
-
-    for (let y = 0; y < board[0].length; y++) {
-        for (let x = 0; x < board[0].length; x++) {
-            const value = board[y][x];
-            if (value === 2) {
-                ctx.fillStyle = "#AAA";
-                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-            } else if (value === 3) {
-                ctx.drawImage(goalCache, x * cellSize, y * cellSize);
-            }
-        }
-    }
 
     return offscreen;
 }

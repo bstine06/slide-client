@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useAppState } from "../../context/StateContext";
 import { createGame, joinGame } from "../../api/GameAPI";
 import { CreateGamePayload, Maze } from "../../types/GameTypes";
-import MazeGenerator from "../game/MazeGenerator";
+import MazeGenerator from "../game/gameplay/utils/MazeGenerator";
 
 const CreateLobby: React.FC = () => {
     const { setAppState, setCurrentGameId } = useAppState();

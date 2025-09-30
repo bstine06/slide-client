@@ -1,44 +1,47 @@
-export function buildGoalCache(cellSize: number, color: string = "#11FF22"): HTMLCanvasElement {
-    const canvas = document.createElement("canvas");
-    canvas.width = cellSize;
-    canvas.height = cellSize;
-    const ctx = canvas.getContext("2d")!;
 
-    const RATIO = 0.7;
-    const innerW = cellSize * RATIO;
-    const innerH = cellSize * RATIO;
-    const gapX  = (cellSize * (1 - RATIO)) / 2;
-    const gapY  = (cellSize * (1 - RATIO)) / 2;
-    const innerX = gapX;
-    const innerY = gapY;
-    const e = Math.min(gapX, gapY) * 0.5;
+import cheesebmp from '../resources/cheese.bmp';
 
-    // // background
-    // ctx.fillStyle = "#999";
-    // ctx.fillRect(0, 0, cellSize, cellSize);
+export class GoalDrawable {
+  private images: Record<string, HTMLImageElement> = {};
+  public loaded = false;
+  public loadPromise: Promise<void>;
 
-    // inner square
-    ctx.fillStyle = color;
-    ctx.fillRect(innerX, innerY, innerW, innerH);
+  constructor(
+    public x: number,
+    public y: number,
+    public w: number,
+    public h: number,
+  ) {
+    // Key = "w" + 4-bit binary string
+    const sources: Record<string, string> = {
+      cheese: cheesebmp,
+    };
 
-    // shadow
-    ctx.lineWidth = e;
-    ctx.strokeStyle = "rgba(0,0,0,0.4)";
-    ctx.beginPath();
-    ctx.moveTo(innerX, innerY);
-    ctx.lineTo(innerX + innerW, innerY);
-    ctx.moveTo(innerX, innerY);
-    ctx.lineTo(innerX, innerY + innerH);
-    ctx.stroke();
+    for (const [key, src] of Object.entries(sources)) {
+      const img = new Image();
+      img.src = src;
+      this.images[key] = img;
+    }
 
-    // highlight
-    ctx.strokeStyle = "rgba(255,255,255,0.5)";
-    ctx.beginPath();
-    ctx.moveTo(innerX, innerY + innerH);
-    ctx.lineTo(innerX + innerW, innerY + innerH);
-    ctx.moveTo(innerX + innerW, innerY);
-    ctx.lineTo(innerX + innerW, innerY + innerH);
-    ctx.stroke();
+    this.loadPromise = Promise.all(
+      Object.values(this.images).map(
+        (img) =>
+          new Promise<void>((resolve) => {
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+          }),
+      ),
+    ).then(() => {
+      this.loaded = true;
+    });
+  }
 
-    return canvas;
+  async draw(ctx: CanvasRenderingContext2D) {
+    if (!this.loaded) {
+      await this.loadPromise;
+    }
+    const img = this.images["cheese"];
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(img, this.x, this.y, this.w, this.h);
+  }
 }

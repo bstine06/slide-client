@@ -3,20 +3,20 @@ import GameCanvas from "./GameCanvas";
 import { GameDto } from "../../../types/GameTypes";
 import GameController from "./GameController";
 import { GameContext, GameProvider } from "../../../context/GameContext";
-import { startGameLoop } from "./GameLoop";
-import { GameEngine } from "./GameEngine";
-import MazeGenerator from "../MazeGenerator";
+import { startGameLoop } from "./utils/GameLoop";
+import { GameEngine } from "./utils/GameEngine";
+import MazeGenerator from "./utils/MazeGenerator";
 
 export const GameplayTest: React.FC = () => {
     // Minimal mock game state
     const mockGame: GameDto = {
-        gameId: "4f46b22e-a347-411a-85dc-916b267f8094",
-        hostUsername: "bstine06",
+        gameId: "00000000-0000-0000-0000-000000000000",
+        hostUsername: "zen",
         phase: "IN_PROGRESS",
         players: {
-            "bstine06":
+            "zen":
                 {
-                    username: "bstine06",
+                    username: "zen",
                     ready: false,
                     level: 0,
                     x: 1,
@@ -26,20 +26,21 @@ export const GameplayTest: React.FC = () => {
                     nextMove: null,
                     stopX: null,
                     stopY: null,
-                    color: "#9900FF"
+                    color: "#9900FF",
+                    angle: 0
                 },
         },
         mazes: [],
     };
 
     const [game, setGame] = useState<GameDto | null>(mockGame);
-    const [engine] = useState(() => new GameEngine(mockGame, "bstine06"));
+    const [engine] = useState(() => new GameEngine(mockGame, "zen"));
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        mockGame.mazes = MazeGenerator.generateMazeArray(25, 16, "SPARSE", 3);
-        mockGame.players["bstine06"].x = mockGame.mazes[0].startX;
-        mockGame.players["bstine06"].y = mockGame.mazes[0].startY;
+        mockGame.mazes = MazeGenerator.generateMazeArray(25, 12, "SPARSE", 3);
+        mockGame.players["zen"].x = mockGame.mazes[0].startX;
+        mockGame.players["zen"].y = mockGame.mazes[0].startY;
         setLoading(false);
         startGameLoop(engine, setGame);
     }, [engine]);
@@ -47,8 +48,8 @@ export const GameplayTest: React.FC = () => {
     return (
         <>
         <h1>Canvas Test</h1>
-        {!loading && game && <GameCanvas game={game} playerName="bstine06"/>}
-        <GameController engine={engine} username="bstine06"/>
+        {!loading && game && <GameCanvas game={game} playerName="zen"/>}
+        <GameController engine={engine} username="zen"/>
         </>
     );
 };

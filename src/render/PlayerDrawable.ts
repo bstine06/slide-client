@@ -1,64 +1,62 @@
+
+import rat00bmp from '../resources/rat00.bmp';
+import rat01bmp from '../resources/rat01.bmp';
+import rat02bmp from '../resources/rat02.bmp';
+import rat03bmp from '../resources/rat03.bmp';
+
 export class PlayerDrawable {
-    private RATIO = 0.7;
-    private cache: HTMLCanvasElement;
+  private movementFrames: HTMLImageElement[] = [];
+  public loaded = false;
+  public loadPromise: Promise<void>;
 
-    constructor(
-        public x: number,
-        public y: number,
-        public w: number,
-        public h: number,
-        public color: string
-    ) {
-        this.cache = this.buildCache();
+  constructor(
+    public x: number,
+    public y: number,
+    public w: number,
+    public h: number,
+  ) {
+    // Key = "w" + 4-bit binary string
+    const sources: Record<string, string> = {
+      rat00: rat00bmp,
+      rat01: rat01bmp,
+      rat02: rat02bmp,
+      rat03: rat03bmp
+    };
+
+    Object.values(sources).forEach((value, i) => {
+      const img = new Image();
+      img.src = value;
+      this.movementFrames[i] = img;
+    })
+
+    this.loadPromise = Promise.all(
+      Object.values(this.movementFrames).map(
+        (img) =>
+          new Promise<void>((resolve) => {
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+          }),
+      ),
+    ).then(() => {
+      this.loaded = true;
+    });
+  }
+
+  async draw(ctx: CanvasRenderingContext2D, frame: number, isMoving: boolean, angle: number) {
+    if (!this.loaded) {
+      await this.loadPromise;
     }
 
-    // Draw the static embossed square to an offscreen canvas
-    private buildCache(): HTMLCanvasElement {
-        const canvas = document.createElement("canvas");
-        canvas.width = this.w;
-        canvas.height = this.h;
-        const ctx = canvas.getContext("2d")!;
-        
-        const innerW = this.w * this.RATIO;
-        const innerH = this.h * this.RATIO;
-        const gapX  = (this.w * (1 - this.RATIO)) / 2;
-        const gapY  = (this.h * (1 - this.RATIO)) / 2;
-        const innerX = gapX;
-        const innerY = gapY;
-        const e = Math.min(gapX, gapY) * 0.5;
+    const img = this.movementFrames[isMoving ? frame % 4 : 0];
+    ctx.save(); // <— save the current transform
+    ctx.imageSmoothingEnabled = false;
 
-        // "backgound"
-        // ctx.fillStyle = "#999";
-        // ctx.fillRect(0, 0, this.w, this.h);
+    // Move origin to the center of the player before rotating
+    ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
+    ctx.rotate(angle);
 
-        ctx.fillStyle = this.color;
-        ctx.fillRect(innerX, innerY, innerW, innerH);
-
-        ctx.lineWidth = e;
-
-        // Highlight
-        ctx.strokeStyle = "rgba(255,255,255,0.5)";
-        ctx.beginPath();
-        ctx.moveTo(innerX, innerY);
-        ctx.lineTo(innerX + innerW, innerY);
-        ctx.moveTo(innerX, innerY);
-        ctx.lineTo(innerX, innerY + innerH);
-        ctx.stroke();
-
-        // Shadow
-        ctx.strokeStyle = "rgba(0,0,0,0.4)";
-        ctx.beginPath();
-        ctx.moveTo(innerX, innerY + innerH);
-        ctx.lineTo(innerX + innerW, innerY + innerH);
-        ctx.moveTo(innerX + innerW, innerY);
-        ctx.lineTo(innerX + innerW, innerY + innerH);
-        ctx.stroke();
-
-        return canvas;
-    }
-
-    // Now the draw method is trivial
-    draw(context: CanvasRenderingContext2D) {
-        context.drawImage(this.cache, this.x, this.y);
-    }
+    // Draw the image centered
+    ctx.drawImage(img, -this.w / 2, -this.h / 2, this.w, this.h);
+    ctx.restore(); // <— restore to pre-rotation state
+  }
 }

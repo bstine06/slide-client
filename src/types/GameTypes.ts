@@ -4,7 +4,10 @@ export interface Maze {
   finishX: number;
   finishY: number;
   board: number[][]; // 2D array of ints
+  theme: MazeTheme;
 }
+
+export type MazeTheme = "SEWER"
 
 export interface CreateGamePayload {
   mazes: Maze[];
@@ -37,6 +40,7 @@ export interface Player {
     vx: number;
     vy: number;
     nextMove: Direction;
+    angle: number;
     stopX: number | null;
     stopY: number | null;
     color: string;

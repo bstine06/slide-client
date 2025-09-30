@@ -1,6 +1,6 @@
-import { GameDto, Player } from "../../../types/GameTypes";
+import { GameDto, Player } from "../../../../types/GameTypes";
 
-import { PlayerUpdatePayload } from "../../../types/WebSocketMessageTypes";
+import { PlayerUpdatePayload } from "../../../../types/WebSocketMessageTypes";
 
 type EngineEventCallback = (update: PlayerUpdatePayload) => void;
 
@@ -53,7 +53,7 @@ export class GameEngine {
         for (const [username, p] of Object.entries(this.state.players)) {
             
             const maze = this.state.mazes[p.level];
-            this.VELOCITY = maze.board.length / 5 + 5 / maze.board.length;
+            this.VELOCITY = maze.board.length / 15 + 5 / maze.board.length;
             const velocityCap = this.VELOCITY * 5;
 
             //check for finish
@@ -137,6 +137,7 @@ export class GameEngine {
         const p = this.state.players[username];
         if (p.vy === 0) {
             p.vx = -1 * velocity;
+            p.angle = 3 * Math.PI / 2;
             this.recalcStopPosition(p);
         } else {
             p.nextMove = "LEFT";
@@ -148,6 +149,7 @@ export class GameEngine {
         const p = this.state.players[username];
         if (p.vy === 0) {
             p.vx = velocity;
+            p.angle = Math.PI / 2;
             this.recalcStopPosition(p);
         } else {
             p.nextMove = "RIGHT";
@@ -158,6 +160,7 @@ export class GameEngine {
         const p = this.state.players[username];
         if (p.vx === 0) {
             p.vy = -1 * velocity;
+            p.angle = 0;
             this.recalcStopPosition(p);
         } else {
             p.nextMove = "UP";
@@ -168,6 +171,7 @@ export class GameEngine {
         const p = this.state.players[username];
         if (p.vx === 0) {
             p.vy = velocity;
+            p.angle = Math.PI;
             this.recalcStopPosition(p);
         } else {
             p.nextMove = "DOWN";

@@ -16,6 +16,10 @@ const Lobby: React.FC = () => {
         readyUp(!currentGame.players[username]?.ready); // notify server
     };
 
+    useEffect(() => {
+        console.log(currentGame);
+    }, [currentGame]);
+
     const handleLeave = async () => {
         if (!token) return;
 

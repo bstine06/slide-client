@@ -91,3 +91,9 @@ export async function renderGame(context: CanvasRenderingContext2D, game: GameDt
         p.angle
     );
 }
+
+export function eraseCaches() : void {
+    wallLayerCache = null;
+    backgroundLayerCache = null;
+    pathLayerCache = null;
+}

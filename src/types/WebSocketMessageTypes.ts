@@ -31,6 +31,7 @@ export interface PlayerUpdatePayload {
     vx: number;
     vy: number;
     nextMove: Direction;
+    angle: number;
     stopX: number;
     stopY: number;
 }

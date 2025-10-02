@@ -1,3 +1,4 @@
+require('dotenv').config();
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
@@ -8,7 +9,7 @@ module.exports = {
   mode: 'development', // Change to 'production' for builds
   entry: './src/index.js',
   devServer: {
-    host: 'localhost',
+    host: process.env.HOST || 'localhost',
     port: 3000,
     allowedHosts: 'all',
     open: true,

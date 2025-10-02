@@ -31,6 +31,7 @@ export const GameplayTest: React.FC = () => {
                 },
         },
         mazes: [],
+        startTime: Date.now()
     };
 
     const [game, setGame] = useState<GameDto | null>(mockGame);
@@ -47,7 +48,6 @@ export const GameplayTest: React.FC = () => {
 
     return (
         <>
-        <h1>Canvas Test</h1>
         {!loading && game && <GameCanvas game={game} playerName="zen"/>}
         <GameController engine={engine} username="zen"/>
         </>

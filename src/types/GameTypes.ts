@@ -26,6 +26,7 @@ export interface GameDto {
     phase: GamePhase;
     players: Record<string, Player>;
     mazes: Maze[];
+    startTime: number;
 }
 
 export type DirectionNonNull = "RIGHT" | "LEFT" | "DOWN" | "UP"

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { renderGame } from "../../../render/Renderer";
+import { renderGame, eraseCaches } from "../../../render/Renderer";
 import { GameDto } from "../../../types/GameTypes";
 
 interface GameCanvasProps {
@@ -8,7 +8,6 @@ interface GameCanvasProps {
 }
 
 const GameCanvas : React.FC<GameCanvasProps> = ({game, playerName}) => {
-
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const WIDTH = 400;
     const HEIGHT = 400;
@@ -16,20 +15,28 @@ const GameCanvas : React.FC<GameCanvasProps> = ({game, playerName}) => {
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-        const context = canvas.getContext('2d');
+        const context = canvas.getContext("2d");
         if (!context) return;
 
         renderGame(context, game, playerName);
     }, [game]);
 
+    // separate unmount-only cleanup
+    useEffect(() => {
+        return () => {
+            eraseCaches();
+        };
+    }, []); // empty deps = only on unmount
+
     return (
         <>
             <h1>Game Canvas</h1>
-            <h2>{game.players[playerName]?.level}/{game.mazes.length! - 1}</h2>
+            <h2>
+                {game.players[playerName]?.level}/{game.mazes.length! - 1}
+            </h2>
             <canvas ref={canvasRef} width={WIDTH} height={HEIGHT} />
         </>
-    )
-
+    );
 }
 
 export default GameCanvas;

@@ -53,7 +53,7 @@ export class GameEngine {
         for (const [username, p] of Object.entries(this.state.players)) {
             
             const maze = this.state.mazes[p.level];
-            this.VELOCITY = maze.board.length / 15 + 5 / maze.board.length;
+            this.VELOCITY = maze.board.length / 8 + 5 / maze.board.length;
             const velocityCap = this.VELOCITY * 5;
 
             //check for finish
@@ -217,6 +217,7 @@ export class GameEngine {
                     vx: p.vx,
                     vy: p.vy,
                     nextMove: p.nextMove,
+                    angle: p.angle,
                     stopX: p.stopX!,
                     stopY: p.stopY!,
                 };
@@ -295,5 +296,20 @@ export class GameEngine {
             }
             p.stopY = stopY;
         }
+    }
+
+    destroy() {
+        // Clear out listeners
+        this.listeners = [];
+
+        // Reset state references
+        this.lastSentLocal = null;
+
+        // If you ever add requestAnimationFrame or setInterval, clear them here
+        // cancelAnimationFrame(this.rafId);
+        // clearInterval(this.intervalId);
+
+        // If you add socket connections, close them here
+        // this.socket?.close();
     }
 }

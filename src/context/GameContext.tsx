@@ -36,7 +36,7 @@ export const GameContext = createContext<GameContextType | null>(null);
 export const GameProvider = ({ children }: { children: ReactNode }) => {
     const [currentGame, setCurrentGame] = useState<GameDto | null>(null);
     const [loading, setLoading] = useState(true);
-    const { currentGameId } = useAppState();
+    const { currentGameId, setCurrentGameId } = useAppState();
     const { username, token } = useAuth();
     const wsRef = useRef<WebSocket | null>(null);
 
@@ -140,6 +140,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
                 case 1000:
                     alert(`Session closed: ${event.reason}`);
             }
+            setCurrentGame(null);
+            setCurrentGameId(undefined);
         };
 
         return () => {
@@ -168,6 +170,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
                 payload: { username },
             };
             wsRef.current?.send(JSON.stringify(message));
+            setCurrentGame(null);
+            setCurrentGameId(undefined);
         } catch (error) {
             console.error(error);
         }

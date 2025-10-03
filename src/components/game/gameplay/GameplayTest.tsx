@@ -39,7 +39,7 @@ export const GameplayTest: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        mockGame.mazes = MazeGenerator.generateMazeArray(25, 6, "DENSE", 3);
+        mockGame.mazes = MazeGenerator.generateMazeArray(25, 16, "DENSE", 3);
         mockGame.players["zen"].x = mockGame.mazes[0].startX;
         mockGame.players["zen"].y = mockGame.mazes[0].startY;
         setLoading(false);

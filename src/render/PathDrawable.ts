@@ -27,10 +27,10 @@ export class PathDrawable {
     if (this.loaded) return; // already done
     if (this.loadPromise) return this.loadPromise; // already in progress
 
-    for (const [key, src] of Object.entries(PathDrawable.sources)) {
+    for (const [key, src] of Object.entries(this.sources)) {
       const img = new Image();
       img.src = src;
-      PathDrawable.images[key] = img;
+      this.images[key] = img;
     }
 
     this.loadPromise = Promise.all(

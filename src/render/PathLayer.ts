@@ -10,7 +10,7 @@ export function buildPathLayer(
 ): HTMLCanvasElement {
     const offscreen = document.createElement("canvas");
     offscreen.width = board[0].length * cellSize;
-    offscreen.height = board[0].length * cellSize;
+    offscreen.height = board.length * cellSize;
     const ctx = offscreen.getContext("2d")!;
 
     generatePath(board, cellSize, ctx);
@@ -56,3 +56,4 @@ function generatePath (
         }
     }
 }
+

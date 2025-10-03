@@ -7,7 +7,6 @@ type EngineEventCallback = (update: PlayerUpdatePayload) => void;
 export class GameEngine {
     private state: GameDto;
     private localUsername: string;
-    private ACCELERATION: number = 1.02;
     private VELOCITY: number = 1;
 
     private listeners: EngineEventCallback[] = [];
@@ -145,7 +144,6 @@ export class GameEngine {
         this.sendUpdate(p);
     }
     moveRight(username: string, velocity: number = this.VELOCITY): void {
-        console.log("ENGINE MOVE RIGHT");
         const p = this.state.players[username];
         if (p.vy === 0) {
             p.vx = velocity;

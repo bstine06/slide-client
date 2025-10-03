@@ -12,7 +12,7 @@ class MazeGenerator {
         startY: number,
         startX: number,
         density: number = 0.3,
-        length: number = dimension
+        length: number = Math.floor(dimension/1.5)
     ): Maze {
         // 1 = empty
         const board: number[][] = Array.from({ length: dimension }, () =>
@@ -221,21 +221,22 @@ class MazeGenerator {
         let startY = Math.floor(Math.random() * dimension);
         for (let i = 0; i < count; i++) {
             let density = 0.99;
-            // switch (densityType) {
-            //     case "BIAS_DENSE_AND_SPARSE":
-            //         density =
-            //             Math.random() > 0.5
-            //                 ? Math.pow(Math.random(), 0.25)
-            //                 : Math.pow(Math.random(), 4);
-            //         break;
-            //     case "SPARSE":
-            //         density = Math.pow(Math.random(), 4);
-            //         break;
-            //     case "DENSE":
-            //         // density = Math.pow(Math.min(Math.random(), 0.5), 0.25);
-            //         density = 0.99;
-            //         break;
-            // }
+            console.log(densityType);
+            switch (densityType) {
+                case "BIAS_DENSE_AND_SPARSE":
+                    density =
+                        Math.random() > 0.5
+                            ? Math.pow(Math.random(), 0.25)
+                            : Math.pow(Math.random(), 4);
+                    break;
+                case "SPARSE":
+                    density = Math.pow(Math.random(), 4);
+                    break;
+                case "DENSE":
+                    // density = Math.pow(Math.min(Math.random(), 0.5), 0.25);
+                    density = 0.99;
+                    break;
+            }
             let maze = this.generateMaze(dimension, startY, startX, density);
             while (
                 this.bfsShortestPath(maze) <= enforceShortestPathGreaterThan

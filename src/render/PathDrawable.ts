@@ -4,9 +4,15 @@ import p0001bmp from '../resources/p0001.bmp';
 import p0002bmp from '../resources/p0002.bmp';
 
 export class PathDrawable {
-  private images: Record<string, HTMLImageElement> = {};
-  public loaded = false;
-  public loadPromise: Promise<void>;
+  static images: Record<string, HTMLImageElement> = {};
+  static loaded = false;
+  static loadPromise: Promise<void>;
+
+  static sources: Record<string, string> = {
+      p0000: p0000bmp,
+      p0001: p0001bmp,
+      p0002: p0002bmp,
+    };
 
   constructor(
     public x: number,
@@ -14,17 +20,17 @@ export class PathDrawable {
     public w: number,
     public h: number,
   ) {
-    // Key = "w" + 4-bit binary string
-    const sources: Record<string, string> = {
-      p0000: p0000bmp,
-      p0001: p0001bmp,
-      p0002: p0002bmp,
-    };
+  }
 
-    for (const [key, src] of Object.entries(sources)) {
+  static async preLoadAssets() : Promise<void> {
+
+    if (this.loaded) return; // already done
+    if (this.loadPromise) return this.loadPromise; // already in progress
+
+    for (const [key, src] of Object.entries(PathDrawable.sources)) {
       const img = new Image();
       img.src = src;
-      this.images[key] = img;
+      PathDrawable.images[key] = img;
     }
 
     this.loadPromise = Promise.all(
@@ -38,13 +44,14 @@ export class PathDrawable {
     ).then(() => {
       this.loaded = true;
     });
+    return this.loadPromise;
   }
 
-  async draw(ctx: CanvasRenderingContext2D, pathType: string) {
-    if (!this.loaded) {
-      await this.loadPromise;
+  public draw(ctx: CanvasRenderingContext2D, pathType: string) {
+    if (!PathDrawable.loaded) {
+      throw new Error("Assets for Path Drawable were not loaded before draw");
     }
-    const img = this.images[pathType] ?? this.images.p0000;
+    const img = PathDrawable.images[pathType] ?? PathDrawable.images.p0000;
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(img, this.x, this.y, this.w, this.h);
   }

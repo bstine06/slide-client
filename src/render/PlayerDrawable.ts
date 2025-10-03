@@ -1,62 +1,98 @@
-
 import rat00bmp from '../resources/rat00.bmp';
 import rat01bmp from '../resources/rat01.bmp';
 import rat02bmp from '../resources/rat02.bmp';
 import rat03bmp from '../resources/rat03.bmp';
 
 export class PlayerDrawable {
-  private movementFrames: HTMLImageElement[] = [];
-  public loaded = false;
-  public loadPromise: Promise<void>;
+  static loaded = false;
+  static loadPromise: Promise<void> | null = null;
+  static sources: Record<string, string> = {
+    rat00: rat00bmp,
+    rat01: rat01bmp,
+    rat02: rat02bmp,
+    rat03: rat03bmp,
+  };
+  static staticFrames: HTMLImageElement[] = [];
+
+  private playerFrames: HTMLImageElement[] = [];
 
   constructor(
     public x: number,
     public y: number,
     public w: number,
     public h: number,
+    public color: string
   ) {
-    // Key = "w" + 4-bit binary string
-    const sources: Record<string, string> = {
-      rat00: rat00bmp,
-      rat01: rat01bmp,
-      rat02: rat02bmp,
-      rat03: rat03bmp
-    };
+    if (!PlayerDrawable.loaded) {
+      throw new Error("Assets for Player Drawable were not loaded before draw.");
+    }
 
-    Object.values(sources).forEach((value, i) => {
+    // create tinted frames for this player
+    this.playerFrames = PlayerDrawable.staticFrames.map(
+      (img) => PlayerDrawable.tintImage(img, color, w, h)
+    );
+  }
+
+  static async preLoadAssets(): Promise<void> {
+    if (this.loaded) return;
+    if (this.loadPromise) return this.loadPromise;
+
+    this.staticFrames = Object.values(this.sources).map((src) => {
       const img = new Image();
-      img.src = value;
-      this.movementFrames[i] = img;
-    })
+      img.src = src;
+      return img;
+    });
 
     this.loadPromise = Promise.all(
-      Object.values(this.movementFrames).map(
+      this.staticFrames.map(
         (img) =>
           new Promise<void>((resolve) => {
             img.onload = () => resolve();
-            img.onerror = () => resolve();
-          }),
-      ),
+            img.onerror = () => resolve(); // resolve anyway
+          })
+      )
     ).then(() => {
       this.loaded = true;
     });
+
+    return this.loadPromise;
   }
 
-  async draw(ctx: CanvasRenderingContext2D, frame: number, isMoving: boolean, angle: number) {
-    if (!this.loaded) {
-      await this.loadPromise;
-    }
+  static tintImage(
+    img: HTMLImageElement,
+    color: string,
+    w: number,
+    h: number
+  ): HTMLImageElement {
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d")!;
 
-    const img = this.movementFrames[isMoving ? frame % 4 : 0];
-    ctx.save(); // <— save the current transform
+    // Draw the original image
+    ctx.drawImage(img, 0, 0, w, h);
+
+    // Apply color overlay using "source-in"
+    ctx.globalCompositeOperation = "source-in";
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, w, h);
+
+    // Convert back to HTMLImageElement
+    const tinted = new Image();
+    tinted.src = canvas.toDataURL();
+    return tinted;
+  }
+
+draw(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, frame: number, isMoving: boolean, angle: number) {
+    const img = this.playerFrames[isMoving ? frame % 4 : 0];
+    ctx.save();
     ctx.imageSmoothingEnabled = false;
 
-    // Move origin to the center of the player before rotating
-    ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
+    ctx.translate(x + w / 2, y + h / 2);
     ctx.rotate(angle);
 
-    // Draw the image centered
-    ctx.drawImage(img, -this.w / 2, -this.h / 2, this.w, this.h);
-    ctx.restore(); // <— restore to pre-rotation state
-  }
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    ctx.restore();
+}
+
 }

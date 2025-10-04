@@ -152,6 +152,7 @@ class MazeGenerator {
         board[finishY][finishX] = 3;
 
         // fill board with noise, excluding the defined necessary path & walls
+        console.log(density);
 
         for (let i = 0; i < dimension; i++) {
             for (let j = 0; j < dimension; j++) {
@@ -237,11 +238,12 @@ class MazeGenerator {
                     density = 0.99;
                     break;
             }
+            console.log(density);
             let maze = this.generateMaze(dimension, startY, startX, density);
             while (
                 this.bfsShortestPath(maze) <= enforceShortestPathGreaterThan
             ) {
-                maze = this.generateMaze(dimension, startY, startX);
+                maze = this.generateMaze(dimension, startY, startX, density);
             }
             mazeArray.push(maze);
             startX = maze.finishX;

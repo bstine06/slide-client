@@ -32,7 +32,8 @@ function generatePath (
             // skip if this space is a wall
             if (board[y][x] === 1) continue;
 
-            const pathType = "p000" + Math.floor((Math.pow(Math.random(), 20) * 3));
+            const pathType = "p0000" 
+            //+ Math.floor((Math.pow(Math.random(), 20) * 3));
 
             const path = new PathDrawable(
                 x * cellSize,

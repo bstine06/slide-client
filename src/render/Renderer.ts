@@ -94,15 +94,12 @@ export async function renderGame(
 
         // If transitioning, fade out the old level, fade in the new
         if (viewportTransition.active) {
-            if (l === viewportTransition.fromLevel) {
-                alpha *= 1 - progress; // fade out old
-            }
             if (l === viewportTransition.toLevel) {
                 alpha *= progress; // fade in new
             }
         }
 
-        const scale = Math.pow(0.8, effectiveLevel - l);
+        const scale = Math.pow(0.92, effectiveLevel - l);
         const w = canvas.width * scale;
         const h = canvas.height * scale;
         const offsetX = (canvas.width - w) / 2;
@@ -139,7 +136,7 @@ export async function renderGame(
     }
 
     // Draw the current player with interpolated scale and alpha
-    const interpScale = Math.pow(0.8, effectiveLevel - player.level);
+    const interpScale = Math.pow(0.92, effectiveLevel - player.level);
     const w = canvas.width * interpScale;
     const h = canvas.height * interpScale;
     const offsetX = (canvas.width - w) / 2;
